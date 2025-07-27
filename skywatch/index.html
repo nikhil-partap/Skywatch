@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Professional Weather App - Get real-time weather information for any location">
+    <title>SkyWatch - Weather App</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <i class="fas fa-cloud-sun"></i>
+                <h1>SkyWatch</h1>
+            </div>
+            <div class="search-container">
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="Search for a city..." autocomplete="off">
+                    <button id="searchBtn" class="search-btn">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+                <button id="locationBtn" class="location-btn" title="Use current location">
+                    <i class="fas fa-location-arrow"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Loading State -->
+            <div id="loadingState" class="loading-state hidden">
+                <div class="spinner"></div>
+                <p>Fetching weather data...</p>
+            </div>
+
+            <!-- Error State -->
+            <div id="errorState" class="error-state hidden">
+                <i class="fas fa-exclamation-triangle"></i>
+                <h3>Oops! Something went wrong</h3>
+                <p id="errorMessage">Unable to fetch weather data. Please try again.</p>
+                <button id="retryBtn" class="retry-btn">Try Again</button>
+            </div>
+
+            <!-- Weather Display -->
+            <div id="weatherDisplay" class="weather-display hidden">
+                <!-- Current Weather -->
+                <section class="current-weather">
+                    <div class="weather-info">
+                        <div class="location">
+                            <h2 id="cityName">City Name</h2>
+                            <p id="countryName">Country</p>
+                            <p id="dateTime">Date & Time</p>
+                        </div>
+                        <div class="weather-main">
+                            <div class="temperature">
+                                <span id="temperature">25</span>°C
+                            </div>
+                            <div class="weather-description">
+                                <i id="weatherIcon" class="weather-icon"></i>
+                                <span id="weatherDescription">Clear Sky</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="weather-details">
+                        <div class="detail-item">
+                            <i class="fas fa-thermometer-half"></i>
+                            <div>
+                                <span class="label">Feels Like</span>
+                                <span id="feelsLike" class="value">25°C</span>
+                            </div>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-tint"></i>
+                            <div>
+                                <span class="label">Humidity</span>
+                                <span id="humidity" class="value">65%</span>
+                            </div>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-wind"></i>
+                            <div>
+                                <span class="label">Wind Speed</span>
+                                <span id="windSpeed" class="value">5.2 km/h</span>
+                            </div>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-eye"></i>
+                            <div>
+                                <span class="label">Visibility</span>
+                                <span id="visibility" class="value">10 km</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Forecast -->
+                <section class="forecast">
+                    <h3>5-Day Forecast</h3>
+                    <div id="forecastContainer" class="forecast-container">
+                        <!-- Forecast cards will be dynamically generated -->
+                    </div>
+                </section>
+
+                <!-- Additional Info -->
+                <section class="additional-info">
+                    <div class="info-grid">
+                        <div class="info-card">
+                            <h4>Sunrise & Sunset</h4>
+                            <div class="sun-info">
+                                <div class="sun-item">
+                                    <i class="fas fa-sunrise"></i>
+                                    <span id="sunrise">06:30</span>
+                                </div>
+                                <div class="sun-item">
+                                    <i class="fas fa-sunset"></i>
+                                    <span id="sunset">18:45</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="info-card">
+                            <h4>Pressure</h4>
+                            <div class="pressure-info">
+                                <i class="fas fa-tachometer-alt"></i>
+                                <span id="pressure">1013 hPa</span>
+                            </div>
+                        </div>
+                        <div class="info-card">
+                            <h4>UV Index</h4>
+                            <div class="uv-info">
+                                <i class="fas fa-sun"></i>
+                                <span id="uvIndex">5</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Welcome State -->
+            <div id="welcomeState" class="welcome-state">
+                <div class="welcome-content">
+                    <i class="fas fa-cloud-sun welcome-icon"></i>
+                    <h2>Welcome to SkyWatch</h2>
+                    <p>Get real-time weather information for any location around the world</p>
+                    <div class="welcome-actions">
+                        <button id="welcomeLocationBtn" class="primary-btn">
+                            <i class="fas fa-location-arrow"></i>
+                            Use My Location
+                        </button>
+                        <p>or</p>
+                        <div class="search-box welcome-search">
+                            <input type="text" id="welcomeSearchInput" placeholder="Search for a city..." autocomplete="off">
+                            <button id="welcomeSearchBtn" class="search-btn">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>&copy; 2024 SkyWatch. Powered by OpenWeatherMap API</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

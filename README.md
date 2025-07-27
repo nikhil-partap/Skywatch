@@ -1,190 +1,177 @@
-# SkyWatch - Professional Weather App
+# SkyWatch Weather App
 
-A modern, responsive weather application built with vanilla JavaScript, featuring beautiful UI design and comprehensive weather data from OpenWeatherMap API.
+A modern, responsive weather application with a secure backend API and beautiful frontend interface.
 
-![SkyWatch Weather App](https://img.shields.io/badge/Weather-App-blue?style=for-the-badge&logo=weather)
-![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-yellow?style=for-the-badge&logo=javascript)
-![CSS3](https://img.shields.io/badge/CSS3-Modern-blue?style=for-the-badge&logo=css3)
-![HTML5](https://img.shields.io/badge/HTML5-Semantic-orange?style=for-the-badge&logo=html5)
+## 📁 Project Structure
 
-## 🌟 Features
-
-### Core Functionality
-- **Real-time Weather Data**: Current weather conditions for any location
-- **5-Day Forecast**: Detailed weather predictions for the upcoming week
-- **Location-based Weather**: Automatic weather detection using GPS
-- **City Search**: Search for weather in any city worldwide
-- **Responsive Design**: Works perfectly on desktop, tablet, and mobile devices
-
-### Advanced Features
-- **Beautiful UI/UX**: Modern glassmorphism design with smooth animations
-- **Error Handling**: Comprehensive error handling with user-friendly messages
-- **Loading States**: Smooth loading animations and state management
-- **Offline Detection**: Detects network connectivity status
-- **Keyboard Shortcuts**: Quick access with keyboard navigation
-- **Local Storage**: Remembers your last searched location
-- **Accessibility**: WCAG compliant with proper focus management
-
-### Weather Information Displayed
-- Current temperature and "feels like" temperature
-- Weather description with dynamic icons
-- Humidity, wind speed, and visibility
-- Sunrise and sunset times
-- Atmospheric pressure
-- 5-day weather forecast with daily averages
+```
+root/
+├── skywatch/             ← Frontend (HTML, CSS, JS)
+│   ├── index.html
+│   ├── style.css
+│   ├── script.js
+│   ├── sw.js
+│   └── README.md
+└── skywatch-backend/     ← Backend (Node.js + Express)
+    ├── server.js
+    ├── package.json
+    ├── env.example
+    ├── BACKEND_SETUP.md
+    ├── .gitignore
+    └── (node_modules/ etc.)
+```
 
 ## 🚀 Quick Start
 
-### Prerequisites
-- A modern web browser (Chrome, Firefox, Safari, Edge)
-- An OpenWeatherMap API key (free tier available)
+### Frontend Setup
 
-### Installation
-
-1. **Clone or download the project**
+1. **Open the frontend**:
    ```bash
-   git clone <repository-url>
-   cd SkyWatch
+   cd skywatch
+   # Open index.html in your browser or serve it
    ```
 
-2. **Get your API key**
-   - Visit [OpenWeatherMap](https://openweathermap.org/api)
-   - Sign up for a free account
-   - Get your API key from the dashboard
-
-3. **Configure the API key**
-   - Open `script.js`
-   - Replace `'YOUR_API_KEY'` on line 4 with your actual API key:
-   ```javascript
-   this.apiKey = 'your_actual_api_key_here';
-   ```
-
-4. **Run the application**
-   - Open `index.html` in your web browser
-   - Or serve it using a local server:
+2. **Serve the frontend** (optional):
    ```bash
-   # Using Python 3
+   # Using Python
    python -m http.server 8000
    
-   # Using Node.js (if you have http-server installed)
+   # Using Node.js
    npx http-server
    
    # Using PHP
    php -S localhost:8000
    ```
 
-5. **Access the app**
-   - Navigate to `http://localhost:8000` in your browser
+### Backend Setup
 
-## 📱 Usage
+1. **Navigate to backend directory**:
+   ```bash
+   cd skywatch-backend
+   ```
 
-### Basic Usage
-1. **Search for a city**: Type a city name in the search box and press Enter or click the search button
-2. **Use current location**: Click the location button to get weather for your current position
-3. **View forecast**: Scroll down to see the 5-day weather forecast
-4. **Check details**: View additional weather information like humidity, wind speed, etc.
+2. **Install dependencies**:
+   ```bash
+   npm install
+   ```
 
-### Keyboard Shortcuts
-- `Ctrl/Cmd + K`: Focus the search input
-- `Enter`: Search for the entered city
-- `Escape`: Clear the search input
+3. **Create environment file**:
+   ```bash
+   cp env.example .env
+   # Edit .env and add your OpenWeatherMap API key
+   ```
 
-## 🛠️ Technical Details
+4. **Start the backend server**:
+   ```bash
+   npm run dev
+   ```
 
-### Architecture
-- **Vanilla JavaScript**: No frameworks, pure ES6+ JavaScript
-- **CSS Grid & Flexbox**: Modern layout techniques
-- **CSS Custom Properties**: Dynamic theming and consistent styling
-- **Fetch API**: Modern HTTP requests with proper error handling
-- **Geolocation API**: Browser-based location detection
+## 🔐 API Key Security
 
-### API Integration
-- **OpenWeatherMap API v2.5**: Current weather and forecast data
-- **RESTful endpoints**: Clean API integration
-- **Error handling**: Comprehensive error management for all API responses
-- **Rate limiting**: Proper handling of API rate limits
+Your OpenWeatherMap API key is securely stored in the backend and hidden from the frontend code. The frontend communicates with your backend API, which then makes requests to OpenWeatherMap.
 
-### Performance Optimizations
-- **Debounced search**: Prevents excessive API calls during typing
-- **Efficient DOM manipulation**: Minimal reflows and repaints
-- **Optimized animations**: Hardware-accelerated CSS transitions
-- **Lazy loading**: Efficient data loading and rendering
+## 🌟 Features
 
-## 🎨 Design Features
+### Frontend Features
+- **Modern UI/UX**: Glassmorphism design with smooth animations
+- **Responsive Design**: Works on all devices
+- **Real-time Weather**: Current conditions and 5-day forecast
+- **Location-based**: GPS integration for current location
+- **City Search**: Global city lookup
+- **PWA Ready**: Service worker for offline functionality
 
-### Visual Design
-- **Glassmorphism**: Modern frosted glass effect with backdrop blur
-- **Gradient backgrounds**: Beautiful color transitions
-- **Smooth animations**: CSS transitions and keyframe animations
-- **Responsive icons**: Font Awesome icons for weather conditions
-- **Typography**: Inter font family for excellent readability
+### Backend Features
+- **Secure API**: API key hidden from frontend
+- **CORS Support**: Works with GitHub Pages
+- **Rate Limiting**: Prevents abuse
+- **Error Handling**: Comprehensive error responses
+- **Health Monitoring**: Health check endpoint
 
-### User Experience
-- **Loading states**: Clear feedback during data fetching
-- **Error states**: Helpful error messages with retry options
-- **Welcome screen**: Engaging onboarding experience
-- **Hover effects**: Interactive elements with smooth transitions
-- **Mobile-first**: Optimized for touch interactions
+## 🔧 Configuration
 
-## 🔧 Customization
-
-### Styling
-The app uses CSS custom properties for easy theming. You can modify the colors in `style.css`:
-
-```css
-:root {
-    --primary-color: #667eea;
-    --secondary-color: #764ba2;
-    --accent-color: #f093fb;
-    /* ... other variables */
-}
+### Frontend Configuration
+Update the backend URL in `skywatch/script.js`:
+```javascript
+this.backendUrl = 'http://localhost:3000'; // Change to your deployed backend URL
 ```
 
-### Features
-You can easily extend the app by:
-- Adding more weather data points
-- Implementing unit conversion (Celsius/Fahrenheit)
-- Adding weather alerts
-- Integrating with additional weather APIs
-- Adding weather maps integration
+### Backend Configuration
+Create `.env` file in `skywatch-backend/`:
+```env
+OPENWEATHER_API_KEY=your_api_key_here
+PORT=3000
+NODE_ENV=development
+ALLOWED_ORIGINS=https://yourusername.github.io,http://localhost:3000
+```
 
-## 🌐 Browser Support
+## 🚀 Deployment
+
+### Frontend Deployment (GitHub Pages)
+1. Push your `skywatch/` folder to GitHub
+2. Enable GitHub Pages in repository settings
+3. Update backend URL in `script.js` to your deployed backend
+
+### Backend Deployment
+See `skywatch-backend/BACKEND_SETUP.md` for detailed deployment instructions.
+
+## 📊 API Endpoints
+
+### Backend Endpoints
+- `GET /health` - Health check
+- `GET /weather?city=London` - Current weather by city
+- `GET /weather?lat=51.5074&lon=-0.1278` - Current weather by coordinates
+- `GET /forecast?city=London` - 5-day forecast by city
+- `GET /forecast?lat=51.5074&lon=-0.1278` - 5-day forecast by coordinates
+
+## 🛠️ Development
+
+### Frontend Development
+```bash
+cd skywatch
+# Edit HTML, CSS, or JS files
+# Open index.html in browser to test
+```
+
+### Backend Development
+```bash
+cd skywatch-backend
+npm run dev  # Auto-restart on file changes
+```
+
+## 🔒 Security
+
+- ✅ API key hidden from frontend
+- ✅ CORS protection
+- ✅ Rate limiting
+- ✅ Input validation
+- ✅ Error handling
+- ✅ Security headers
+
+## 📱 Browser Support
 
 - Chrome 60+
 - Firefox 55+
 - Safari 12+
 - Edge 79+
 
-## 📄 License
-
-This project is open source and available under the [MIT License](LICENSE).
-
 ## 🤝 Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
 
-## 📞 Support
+## 📄 License
 
-If you encounter any issues or have questions:
-1. Check the browser console for error messages
-2. Verify your API key is correctly configured
-3. Ensure you have an active internet connection
-4. Check if the OpenWeatherMap API is accessible
+This project is open source and available under the MIT License.
 
 ## 🔗 Links
 
-- [OpenWeatherMap API Documentation](https://openweathermap.org/api)
-- [Font Awesome Icons](https://fontawesome.com/)
-- [Inter Font Family](https://rsms.me/inter/)
-
-## 📊 API Usage
-
-The app uses the following OpenWeatherMap API endpoints:
-- Current Weather: `/weather`
-- 5-Day Forecast: `/forecast`
-
-**Note**: The free tier of OpenWeatherMap API has rate limits. For production use, consider upgrading to a paid plan.
+- [Frontend Documentation](skywatch/README.md)
+- [Backend Setup Guide](skywatch-backend/BACKEND_SETUP.md)
+- [OpenWeatherMap API](https://openweathermap.org/api)
 
 ---
 
-**Built with ❤️ using modern web technologies** # Skywatch
+**Built with ❤️ using modern web technologies** 
