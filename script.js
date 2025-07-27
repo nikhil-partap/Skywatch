@@ -7,14 +7,14 @@ class WeatherApp {
         this.forecast = null;
         this.lastSearchedCity = null;
         
-        this.initializeApp();
-        this.bindEvents();
+        this.initializeApp();    // this function is responsible for showing the welcome page and loading the last location from localStorage without it we will load a blank welcome page
+        this.bindEvents();       // this function is responsible for the working of all the buttons and inputs in the app it connects the event listeners to the buttons and inputs 
     }
 
     // Initialize the application
     initializeApp() {
-        this.showWelcomeState();
-        this.loadLastLocation();
+        this.showWelcomeState();   // without this we will load a blank welcome page 
+        this.loadLastLocation();  // this function is responsible for loading the last location from localStorage 
     }
 
     // Bind all event listeners
@@ -23,7 +23,7 @@ class WeatherApp {
         const searchBtn = document.getElementById('searchBtn');
         const searchInput = document.getElementById('searchInput');
         const welcomeSearchBtn = document.getElementById('welcomeSearchBtn');
-        const welcomeSearchInput = document.getElementById('welcomeaSearchInput');
+        const welcomeSearchInput = document.getElementById('welcomeSearchInput');  // corrected the typo in the id from welcomeaSearchInput to welcomeSearchInput
 
         searchBtn?.addEventListener('click', () => this.handleSearch(searchInput.value));
         welcomeSearchBtn?.addEventListener('click', () => this.handleSearch(welcomeSearchInput.value));
