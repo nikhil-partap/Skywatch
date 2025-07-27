@@ -8,7 +8,7 @@ Your OpenWeatherMap API key is now securely stored in the backend and hidden fro
 
 - Node.js (version 14 or higher)
 - npm or yarn package manager
-- Your OpenWeatherMap API key: `6f17e5a7248147ee5ea6c35160f18a7`
+- Your OpenWeatherMap API key (get one from [OpenWeatherMap](https://openweathermap.org/api))
 
 ## 🚀 Quick Setup
 
@@ -39,7 +39,7 @@ Your `.env` file should look like this:
 
 ```env
 # OpenWeatherMap API Configuration
-OPENWEATHER_API_KEY=6f17e5a7248147ee5ea6c35160f18a7a
+OPENWEATHER_API_KEY=your_actual_api_key_here
 
 # Server Configuration
 PORT=3000
@@ -111,7 +111,7 @@ Replace `yourusername` with your actual GitHub username.
 4. Set environment variables:
 
 ```bash
-heroku config:set OPENWEATHER_API_KEY=6f17e5a7248147ee5ea6c35160f18a7a
+heroku config:set OPENWEATHER_API_KEY=your_actual_api_key_here
 heroku config:set NODE_ENV=production
 heroku config:set ALLOWED_ORIGINS=https://yourusername.github.io
 ```
@@ -139,10 +139,10 @@ git push heroku main
 
 ## 🔄 Update Frontend
 
-After deploying your backend, update the `backendUrl` in `skywatch/script.js`:
+After deploying your backend, update the `backendUrl` in `script.js` (in the root directory):
 
 ```javascript
-// Change this line in skywatch/script.js
+// Change this line in script.js (root directory)
 this.backendUrl = 'https://your-backend-url.herokuapp.com'; // or your deployed URL
 ```
 
@@ -204,7 +204,7 @@ Create your `.env` file in the `skywatch-backend` directory:
 
 ```env
 # OpenWeatherMap API Configuration
-OPENWEATHER_API_KEY=6f17e5a7248147ee5ea6c35160f18a7a
+OPENWEATHER_API_KEY=your_actual_api_key_here
 
 # Server Configuration
 PORT=3000
@@ -222,13 +222,13 @@ RATE_LIMIT_MAX_REQUESTS=100
 
 ```
 root/
-├── skywatch/             ← Frontend
-│   ├── index.html
-│   ├── style.css
-│   ├── script.js
-│   ├── sw.js
-│   └── README.md
-└── skywatch-backend/     ← Backend
+├── index.html           ← Frontend (HTML)
+├── style.css            ← Frontend (CSS)
+├── script.js            ← Frontend (JavaScript)
+├── sw.js                ← Service Worker
+├── manifest.json        ← PWA Manifest
+├── README.md            ← Frontend Documentation
+└── skywatch-backend/    ← Backend
     ├── server.js
     ├── package.json
     ├── env.example
@@ -244,7 +244,7 @@ root/
 - [ ] Dependencies installed (`npm install`)
 - [ ] Backend server running (`npm run dev`)
 - [ ] CORS origins updated for your domain
-- [ ] Frontend `backendUrl` updated in `skywatch/script.js`
+- [ ] Frontend `backendUrl` updated in `script.js` (root directory)
 - [ ] Health check endpoint working
 - [ ] Weather endpoint tested
 - [ ] Deployed to hosting platform (optional)

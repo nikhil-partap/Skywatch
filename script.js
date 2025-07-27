@@ -2,7 +2,7 @@
 class WeatherApp {
     constructor() {
         // Backend API configuration - update this URL when you deploy your backend
-        this.backendUrl = 'http://localhost:3000'; // Change this to your deployed backend URL
+        this.backendUrl = 'https://skywatch-336o.onrender.com'; // Change this to your deployed backend URL
         this.currentWeather = null;
         this.forecast = null;
         this.lastSearchedCity = null;
@@ -23,7 +23,7 @@ class WeatherApp {
         const searchBtn = document.getElementById('searchBtn');
         const searchInput = document.getElementById('searchInput');
         const welcomeSearchBtn = document.getElementById('welcomeSearchBtn');
-        const welcomeSearchInput = document.getElementById('welcomeSearchInput');
+        const welcomeSearchInput = document.getElementById('welcomeaSearchInput');
 
         searchBtn?.addEventListener('click', () => this.handleSearch(searchInput.value));
         welcomeSearchBtn?.addEventListener('click', () => this.handleSearch(welcomeSearchInput.value));

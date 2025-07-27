@@ -6,13 +6,13 @@ A modern, responsive weather application with a secure backend API and beautiful
 
 ```
 root/
-├── skywatch/             ← Frontend (HTML, CSS, JS)
-│   ├── index.html
-│   ├── style.css
-│   ├── script.js
-│   ├── sw.js
-│   └── README.md
-└── skywatch-backend/     ← Backend (Node.js + Express)
+├── index.html           ← Frontend (HTML)
+├── style.css            ← Frontend (CSS)
+├── script.js            ← Frontend (JavaScript)
+├── sw.js                ← Service Worker
+├── manifest.json        ← PWA Manifest
+├── README.md            ← Frontend Documentation
+└── skywatch-backend/    ← Backend (Node.js + Express)
     ├── server.js
     ├── package.json
     ├── env.example
@@ -27,7 +27,6 @@ root/
 
 1. **Open the frontend**:
    ```bash
-   cd skywatch
    # Open index.html in your browser or serve it
    ```
 
@@ -90,9 +89,9 @@ Your OpenWeatherMap API key is securely stored in the backend and hidden from th
 ## 🔧 Configuration
 
 ### Frontend Configuration
-Update the backend URL in `skywatch/script.js`:
+Update the backend URL in `script.js`:
 ```javascript
-this.backendUrl = 'http://localhost:3000'; // Change to your deployed backend URL
+this.backendUrl = 'https://your-backend-url.com'; // Your deployed backend URL
 ```
 
 ### Backend Configuration
@@ -107,7 +106,7 @@ ALLOWED_ORIGINS=https://yourusername.github.io,http://localhost:3000
 ## 🚀 Deployment
 
 ### Frontend Deployment (GitHub Pages)
-1. Push your `skywatch/` folder to GitHub
+1. Push your root folder files to GitHub
 2. Enable GitHub Pages in repository settings
 3. Update backend URL in `script.js` to your deployed backend
 
@@ -127,8 +126,7 @@ See `skywatch-backend/BACKEND_SETUP.md` for detailed deployment instructions.
 
 ### Frontend Development
 ```bash
-cd skywatch
-# Edit HTML, CSS, or JS files
+# Edit HTML, CSS, or JS files in root directory
 # Open index.html in browser to test
 ```
 
@@ -168,10 +166,10 @@ This project is open source and available under the MIT License.
 
 ## 🔗 Links
 
-- [Frontend Documentation](skywatch/README.md)
+- [Frontend Documentation](README.md)
 - [Backend Setup Guide](skywatch-backend/BACKEND_SETUP.md)
 - [OpenWeatherMap API](https://openweathermap.org/api)
 
 ---
 
-**Built with ❤️ using modern web technologies** 
+**Built with ❤️ using modern web technologies**
