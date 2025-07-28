@@ -6,7 +6,7 @@ class WeatherApp {
         this.currentWeather = null;
         this.forecast = null;
         this.lastSearchedCity = null;
-        
+
         this.initializeApp();    // this function is responsible for showing the welcome page and loading the last location from localStorage without it we will load a blank welcome page
         this.bindEvents();       // this function is responsible for the working of all the buttons and inputs in the app it connects the event listeners to the buttons and inputs 
     }
@@ -19,16 +19,18 @@ class WeatherApp {
 
     // Bind all event listeners
     bindEvents() {
-        // Search functionality
+        // Search functionality 
+        // 1 : grab the input field + search button for both Main, Welcome screen.
         const searchBtn = document.getElementById('searchBtn');
         const searchInput = document.getElementById('searchInput');
         const welcomeSearchBtn = document.getElementById('welcomeSearchBtn');
         const welcomeSearchInput = document.getElementById('welcomeSearchInput');  // corrected the typo in the id from welcomeaSearchInput to welcomeSearchInput
 
+        // 2 : When the search button is clicked, grab the current value from the input field and call handleSearch() with that. The ?. ensures the app doesn’t crash if the element is null.
         searchBtn?.addEventListener('click', () => this.handleSearch(searchInput.value));
         welcomeSearchBtn?.addEventListener('click', () => this.handleSearch(welcomeSearchInput.value));
 
-        // Enter key support
+        // Enter key support  : if the user press the enter key it will trigger the handleSearch() same behavior as clicking the search button.
         searchInput?.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') this.handleSearch(searchInput.value);
         });
@@ -36,21 +38,21 @@ class WeatherApp {
             if (e.key === 'Enter') this.handleSearch(welcomeSearchInput.value);
         });
 
-        // Location button
+        // Location button  : These buttons use the browser's geolocation API to get current location weather.
         const locationBtn = document.getElementById('locationBtn');
         const welcomeLocationBtn = document.getElementById('welcomeLocationBtn');
         
         locationBtn?.addEventListener('click', () => this.getCurrentLocation());
         welcomeLocationBtn?.addEventListener('click', () => this.getCurrentLocation());
 
-        // Retry button
+        // Retry button  : This gives the user a way to retry the last failed search, using stored city data.
         const retryBtn = document.getElementById('retryBtn');
         retryBtn?.addEventListener('click', () => this.retryLastSearch());
     }
 
     // Handle search functionality
     async handleSearch(cityName) {
-        if (!cityName.trim()) {
+        if (!cityName.trim()) {    // trim removes the whitespace like "  " from the start and end of the string(cityName)
             this.showError('Please enter a city name');
             return;
         }
