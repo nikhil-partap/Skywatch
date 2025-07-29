@@ -1,11 +1,15 @@
 // Service Worker for SkyWatch Weather App
-const CACHE_NAME = 'skywatch-v1.0.0';
+const CACHE_NAME = 'skywatch-v1.0.2';
 
-const BASE_PATH = self.location.pathname.replace(/\/sw\.js$/, '') || '.';
+// Handle GitHub Pages deployment
+const isGitHubPages = self.location.hostname === 'nikhil-partap.github.io';
+const basePath = isGitHubPages ? '/Skywatch' : '';
+
 const localFiles = [
-    './index.html',
-    './style.css',
-    './script.js'
+    `${basePath}/index.html`,
+    `${basePath}/style.css`,
+    `${basePath}/script.js`,
+    `${basePath}/manifest.json`
 ];
 
 const externalFiles = [
@@ -15,17 +19,32 @@ const externalFiles = [
 
 // Install event - cache resources
 self.addEventListener('install', event => {
+    console.log('Service Worker installing...');
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then(cache => {
+                console.log('Caching local files:', localFiles);
                 return cache.addAll(localFiles)
                     .then(() => {
+                        console.log('Local files cached successfully');
                         // Try caching externals, but don't crash if they fail
                         return Promise.allSettled(
-                            externalFiles.map(url => fetch(url).then(res => {
-                                if (res.ok) cache.put(url, res.clone());
-                            }))
+                            externalFiles.map(url => 
+                                fetch(url)
+                                    .then(res => {
+                                        if (res.ok) {
+                                            cache.put(url, res.clone());
+                                            console.log('Cached external file:', url);
+                                        }
+                                    })
+                                    .catch(err => {
+                                        console.log('Failed to cache external file:', url, err);
+                                    })
+                            )
                         );
+                    })
+                    .catch(err => {
+                        console.error('Failed to cache local files:', err);
                     });
             })
     );
@@ -33,45 +52,67 @@ self.addEventListener('install', event => {
 
 // Fetch event - serve cached content when offline
 self.addEventListener('fetch', event => {
+    // Skip non-GET requests
+    if (event.request.method !== 'GET') {
+        return;
+    }
+
+    // Skip chrome-extension and other non-http requests
+    if (!event.request.url.startsWith('http')) {
+        return;
+    }
+
     event.respondWith(
         caches.match(event.request)
             .then(response => {
                 // Return cached version or fetch from network
                 if (response) {
+                    console.log('Serving from cache:', event.request.url);
                     return response;
                 }
                 
                 // Clone the request because it's a stream
                 const fetchRequest = event.request.clone();
                 
-                return fetch(fetchRequest).then(response => {
-                    // Check if we received a valid response
-                    if (!response || response.status !== 200 || response.type !== 'basic') {
+                return fetch(fetchRequest)
+                    .then(response => {
+                        // Check if we received a valid response
+                        if (!response || response.status !== 200 || response.type !== 'basic') {
+                            return response;
+                        }
+                        
+                        // Clone the response because it's a stream
+                        const responseToCache = response.clone();
+                        
+                        caches.open(CACHE_NAME)
+                            .then(cache => {
+                                cache.put(event.request, responseToCache);
+                                console.log('Cached new resource:', event.request.url);
+                            })
+                            .catch(err => {
+                                console.log('Failed to cache resource:', event.request.url, err);
+                            });
+                        
                         return response;
-                    }
-                    
-                    // Clone the response because it's a stream
-                    const responseToCache = response.clone();
-                    
-                    caches.open(CACHE_NAME)
-                        .then(cache => {
-                            cache.put(event.request, responseToCache);
+                    })
+                    .catch(err => {
+                        console.log('Fetch failed, trying offline fallback:', event.request.url, err);
+                        // Return offline page or cached content
+                        if (event.request.destination === 'document') {
+                            return caches.match(`${basePath}/index.html`);
+                        }
+                        return new Response('Offline content not available', {
+                            status: 503,
+                            statusText: 'Service Unavailable'
                         });
-                    
-                    return response;
-                });
-            })
-            .catch(() => {
-                // Return offline page or cached content
-                if (event.request.destination === 'document') {
-                    return caches.match('/index.html');
-                }
+                    });
             })
     );
 });
 
 // Activate event - clean up old caches
 self.addEventListener('activate', event => {
+    console.log('Service Worker activating...');
     event.waitUntil(
         caches.keys().then(cacheNames => {
             return Promise.all(
@@ -107,8 +148,6 @@ self.addEventListener('push', event => {
         const data = event.data.json();
         const options = {
             body: data.body,
-            icon: '/icon-192x192.png',
-            badge: '/badge-72x72.png',
             vibrate: [100, 50, 100],
             data: {
                 dateOfArrival: Date.now(),
@@ -117,13 +156,11 @@ self.addEventListener('push', event => {
             actions: [
                 {
                     action: 'explore',
-                    title: 'View Weather',
-                    icon: '/icon-192x192.png'
+                    title: 'View Weather'
                 },
                 {
                     action: 'close',
-                    title: 'Close',
-                    icon: '/icon-192x192.png'
+                    title: 'Close'
                 }
             ]
         };
@@ -140,7 +177,7 @@ self.addEventListener('notificationclick', event => {
     
     if (event.action === 'explore') {
         event.waitUntil(
-            clients.openWindow('/')
+            clients.openWindow(`${basePath}/`)
         );
     }
 });

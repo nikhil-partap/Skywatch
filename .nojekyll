@@ -1,0 +1,2 @@
+# This file tells GitHub Pages not to process this site with Jekyll
+# This is important for service worker registration and PWA functionality 
