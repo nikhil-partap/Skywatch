@@ -6,6 +6,7 @@ class WeatherApp {
         this.currentWeather = null;
         this.forecast = null;
         this.lastSearchedCity = null;
+        this.isGettingLocation = false; // Track location request state
 
         // Cache DOM elements for better performance
         this.cacheDOMElements();
@@ -175,11 +176,18 @@ class WeatherApp {
     }
 
     async getCurrentLocation() {
+        // Prevent multiple rapid calls
+        if (this.isGettingLocation) {
+            console.log('Location request already in progress');
+            return;
+        }
+
         if (!navigator.geolocation) {
             this.showError('Geolocation is not supported by your browser');
             return;
         }
 
+        this.isGettingLocation = true;
         this.showLoadingState();
         
         try {
@@ -199,8 +207,17 @@ class WeatherApp {
             // Smooth scroll to weather display
             this.smoothScrollToWeather();
         } catch (error) {
-            console.error('Location error:', error);
-            this.showError('Unable to get your location. Please check your permissions.');
+            console.warn('Location access failed:', error.message);
+            // Don't show error for location permission issues, just log them
+            if (error.message.includes('permission') || error.message.includes('denied')) {
+                console.log('Location permission denied by user');
+            } else if (error.message.includes('unavailable')) {
+                console.log('Location information temporarily unavailable');
+            } else {
+                this.showError('Unable to get your location. Please check your permissions.');
+            }
+        } finally {
+            this.isGettingLocation = false;
         }
     }
 
