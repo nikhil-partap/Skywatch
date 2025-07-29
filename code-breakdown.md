@@ -1,13 +1,6 @@
- I am Going through the entire Skywatch code line-by-line and 
- Following questions will be answered 
-1. What does this block do?
-2. What DOM element is being selected?
-3. How is the data from the API being processed and displayed?
-4. Which function is responsible for what?
-5. What part is reusable? What part is not?
-6. How is the 5-day forecast being calculated?
+ I am Going through the entire Skywatch script.js code line-by-line  
 
-Lets start with script.js
+Lets start 
 ```js
 constructor() {
         // Backend API configuration
@@ -812,7 +805,7 @@ ans-
     If yes, it tries to register the sw.js file.
 
     Logs whether the registration succeeds or fails.        
-    
+
 
 
 
