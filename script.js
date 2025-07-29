@@ -241,7 +241,7 @@ class WeatherApp {
         }
     }
 
-    // Display weather data in the UI
+    // Display weather data in the UI  : this function is responsible for displaying the weather data in the UI.        
     displayWeatherData() {
         this.hideAllStates();
         this.showWeatherDisplay();
