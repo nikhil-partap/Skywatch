@@ -355,14 +355,12 @@ class WeatherApp {
         this.hideAllStates();
         this.showWeatherDisplay();
         
+        // Make the weather display visible immediately
+        this.weatherDisplay.classList.add('animate');
+        
         this.updateCurrentWeather();
         this.updateForecast();
         this.updateAdditionalInfo();
-        
-        // Add animation delay for smooth transitions
-        setTimeout(() => {
-            this.weatherDisplay.classList.add('animate');
-        }, 100);
     }
 
     updateCurrentWeather() {
@@ -394,8 +392,6 @@ class WeatherApp {
         
         dailyForecast.forEach((day, index) => {
             const forecastCard = this.createForecastCard(day);
-            // Add staggered animation delay
-            forecastCard.style.animationDelay = `${index * 0.1}s`;
             this.forecastContainer.appendChild(forecastCard);
         });
     }
