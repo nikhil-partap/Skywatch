@@ -148,7 +148,7 @@ class WeatherApp {
                 {
                     enableHighAccuracy: true,
                     timeout: 10000,
-                    maximumAge: 300000 // 5 minutes
+                    maximumAge: 600000 // 10 minutes
                 }
             );
         });
