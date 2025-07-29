@@ -166,7 +166,52 @@ maximumAge: 300000 → allow cached location if it's < 5 min old.
         }
     }
 ```
-What does this block do?
+ getDailyForecast() {
+        const dailyData = {};
+        
+        this.forecast.list.forEach(item => {
+            const date = new Date(item.dt * 1000);
+            const dayKey = date.toDateString();
+            
+            if (!dailyData[dayKey]) {
+                dailyData[dayKey] = {
+                    date: date,
+                    temp: item.main.temp,
+                    weatherId: item.weather[0].id,
+                    description: item.weather[0].description,
+                    count: 1
+                };
+            } else {
+                dailyData[dayKey].temp += item.main.temp;
+                dailyData[dayKey].count += 1;
+            }
+        });
+
+        // Calculate average temperature and return array
+        return Object.values(dailyData)
+            .map(day => ({
+                ...day,
+                temp: day.temp / day.count
+            }))
+            .slice(0, 5); // Return only 5 days
+    }
+
+    // Update additional weather information
+    updateAdditionalInfo() {
+        const weather = this.currentWeather;
+        
+        // Update sunrise and sunset
+        document.getElementById('sunrise').textContent = this.formatTime(weather.sys.sunrise, weather.timezone);
+        document.getElementById('sunset').textContent = this.formatTime(weather.sys.sunset, weather.timezone);
+        
+        // Update pressure
+        document.getElementById('pressure').textContent = `${weather.main.pressure} hPa`;
+        
+        // Note: UV index is not available in the free API tier
+        // You would need to make an additional API call for this
+        document.getElementById('uvIndex').textContent = 'N/A';
+    }
+
 ans-
 it try to find out the reason due to which the location was not fetch the display it as a error 
 
@@ -396,3 +441,434 @@ ans-
 2) calls a function getDailyForecast() (written somewhere else in your code).
 It takes the raw forecast data (which usually gives data every 3 hours), and groups it into daily summaries.
 3) Create and add each forecast card 
+
+```js
+ getDailyForecast() {
+        const dailyData = {};
+        
+        this.forecast.list.forEach(item => {
+            const date = new Date(item.dt * 1000);
+            const dayKey = date.toDateString();
+            
+            if (!dailyData[dayKey]) {
+                dailyData[dayKey] = {
+                    date: date,
+                    temp: item.main.temp,
+                    weatherId: item.weather[0].id,
+                    description: item.weather[0].description,
+                    count: 1
+                };
+            } else {
+                dailyData[dayKey].temp += item.main.temp;
+                dailyData[dayKey].count += 1;
+            }
+        });
+
+        // Calculate average temperature and return array
+        return Object.values(dailyData)
+            .map(day => ({
+                ...day,
+                temp: day.temp / day.count
+            }))
+            .slice(0, 5); // Return only 5 days
+    }
+
+    // Update additional weather information
+    updateAdditionalInfo() {
+        const weather = this.currentWeather;
+        
+        // Update sunrise and sunset
+        document.getElementById('sunrise').textContent = this.formatTime(weather.sys.sunrise, weather.timezone);
+        document.getElementById('sunset').textContent = this.formatTime(weather.sys.sunset, weather.timezone);
+        
+        // Update pressure
+        document.getElementById('pressure').textContent = `${weather.main.pressure} hPa`;
+        
+        // Note: UV index is not available in the free API tier
+        // You would need to make an additional API call for this
+        document.getElementById('uvIndex').textContent = 'N/A';
+    }
+```
+What does this block do?
+ans- 
+PART 1: getDailyForecast()
+1) takes a huge list of forecast data (every 3 hours for 5 days) and groups it day by day, giving you one summary per day — average temperature, weather description, etc. 
+2) creates an empty object called dailyData. this.forecast.list is an array of forecast items from the API (every 3 hours). This line loops through each item using .forEach().
+3) If this is the first time we see this day, we create a new entry. If we've already seen this date, just add the new temp to the total and increase the count.
+PART 2: updateAdditionalInfo()
+1) updates the extra information section in your app:sunrise, sunset, pressure, UV index.
+
+```js
+// Get weather icon based on weather condition code
+    getWeatherIcon(weatherId) {
+        const iconMap = {
+            // Clear
+            800: 'fas fa-sun',
+            
+            // Clouds
+            801: 'fas fa-cloud-sun',
+            802: 'fas fa-cloud',
+            803: 'fas fa-cloud',
+            804: 'fas fa-clouds',
+            
+            // Rain
+            200: 'fas fa-bolt',
+            201: 'fas fa-cloud-rain',
+            202: 'fas fa-cloud-showers-heavy',
+            210: 'fas fa-bolt',
+            211: 'fas fa-bolt',
+            212: 'fas fa-bolt',
+            221: 'fas fa-bolt',
+            230: 'fas fa-cloud-rain',
+            231: 'fas fa-cloud-rain',
+            232: 'fas fa-cloud-showers-heavy',
+            
+            // Drizzle
+            300: 'fas fa-cloud-rain',
+            301: 'fas fa-cloud-rain',
+            302: 'fas fa-cloud-rain',
+            310: 'fas fa-cloud-rain',
+            311: 'fas fa-cloud-rain',
+            312: 'fas fa-cloud-rain',
+            313: 'fas fa-cloud-rain',
+            314: 'fas fa-cloud-rain',
+            321: 'fas fa-cloud-rain',
+            
+            // Rain
+            500: 'fas fa-cloud-rain',
+            501: 'fas fa-cloud-rain',
+            502: 'fas fa-cloud-showers-heavy',
+            503: 'fas fa-cloud-showers-heavy',
+            504: 'fas fa-cloud-showers-heavy',
+            511: 'fas fa-cloud-rain',
+            520: 'fas fa-cloud-rain',
+            521: 'fas fa-cloud-rain',
+            522: 'fas fa-cloud-showers-heavy',
+            531: 'fas fa-cloud-showers-heavy',
+            
+            // Snow
+            600: 'fas fa-snowflake',
+            601: 'fas fa-snowflake',
+            602: 'fas fa-snowflake',
+            611: 'fas fa-snowflake',
+            612: 'fas fa-snowflake',
+            613: 'fas fa-snowflake',
+            615: 'fas fa-snowflake',
+            616: 'fas fa-snowflake',
+            620: 'fas fa-snowflake',
+            621: 'fas fa-snowflake',
+            622: 'fas fa-snowflake',
+            
+            // Atmosphere
+            701: 'fas fa-smog',
+            711: 'fas fa-smog',
+            721: 'fas fa-smog',
+            731: 'fas fa-smog',
+            741: 'fas fa-smog',
+            751: 'fas fa-smog',
+            761: 'fas fa-smog',
+            762: 'fas fa-smog',
+            771: 'fas fa-wind',
+            781: 'fas fa-tornado'
+        };
+        
+        return iconMap[weatherId] || 'fas fa-cloud';
+    }
+```
+What does this block do?
+ans-
+takes a weather condition code (e.g. 800, 501, 601) — which is returned by the OpenWeatherMap API — and returns a corresponding icon class name from Font Awesome (like fas fa-sun, fas fa-cloud-rain, etc.)
+
+```js
+// Convert wind speed from m/s to km/h
+    convertWindSpeed(speedMs) {
+        const speedKmh = (speedMs * 3.6).toFixed(1);
+        return `${speedKmh} km/h`;
+    }
+
+    // Format date for display
+    formatDate(timestamp) {
+        const date = new Date(timestamp);
+        return date.toLocaleDateString('en-US', { 
+            weekday: 'short',
+            month: 'short',
+            day: 'numeric'
+        });
+    }
+// Format time for display
+    formatTime(timestamp, timezone) {
+        const date = new Date((timestamp + timezone) * 1000);
+        return date.toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false
+        });
+    }
+```
+What does this block do?
+ans-
+1) convertWindSpeed that takes one input: speedMs (meters per second, as given by the OpenWeatherMap API). Converts the speed from m/s to km/h.
+2) Format a Timestamp into a Readable Date
+3) format sunrise/sunset times (or any time) in a way that respects the user’s timezone offset from UTC
+
+```js
+// Format date and time for display
+    formatDateTime(timestamp, timezone) {
+        const date = new Date((timestamp + timezone) * 1000);
+        return date.toLocaleString('en-US', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false
+        });
+    }
+
+    // Show loading state
+    showLoadingState() {
+        this.hideAllStates();
+        document.getElementById('loadingState').classList.remove('hidden');
+    }
+
+    // Show error state
+    showError(message) {
+        this.hideAllStates();
+        const errorState = document.getElementById('errorState');
+        const errorMessage = document.getElementById('errorMessage');
+        
+        errorMessage.textContent = message;
+        errorState.classList.remove('hidden');
+    }
+
+    // Show welcome state
+    showWelcomeState() {
+        this.hideAllStates();
+        document.getElementById('welcomeState').classList.remove('hidden');
+    }
+```
+What does this block do?
+ans-
+🔹 formatDateTime(timestamp, timezone)
+Formats a UTC timestamp (plus a timezone offset) into a full date & time string like "Monday, July 29, 2025, 14:30" in 24-hour format.
+
+🔹 showLoadingState()
+Hides all UI sections and then shows the loading spinner or loading screen.
+
+🔹 showError(message)
+Hides all UI sections and then displays the error screen with a custom message.
+
+🔹 showWelcomeState()
+Hides all UI sections and shows the initial welcome screen (used before any search is made).
+
+```js
+// Show weather display
+    showWeatherDisplay() {
+        document.getElementById('weatherDisplay').classList.remove('hidden');
+    }
+
+    // Hide all states
+    hideAllStates() {
+        const states = ['loadingState', 'errorState', 'welcomeState', 'weatherDisplay'];
+        states.forEach(stateId => {
+            document.getElementById(stateId).classList.add('hidden');
+        });
+    }
+
+    // Retry last search
+    retryLastSearch() {
+        if (this.lastSearchedCity) {
+            this.handleSearch(this.lastSearchedCity);
+        } else {
+            this.getCurrentLocation();
+        }
+    }
+
+    // Save last location to localStorage
+    saveLastLocation(cityName) {
+        try {
+            localStorage.setItem('lastLocation', cityName);
+        } catch (error) {
+            console.warn('Could not save location to localStorage:', error);
+        }
+    }
+```
+What does this block do?
+ans-
+
+✅ showWeatherDisplay()
+Reveals the weather display section by removing the 'hidden' class.
+Used after successfully fetching and preparing weather data.
+
+✅ hideAllStates()
+Hides all major UI states (loading, error, welcome, weatherDisplay) by adding 'hidden' to each one.
+Prevents UI overlap before showing the desired state.
+
+✅ retryLastSearch()
+If a city was previously searched, it re-fetches weather data for it.
+If not, it tries to use the user's current location instead.
+
+✅ saveLastLocation(cityName)
+Stores the last searched city name in localStorage so it can be reloaded later.
+Includes error handling if localStorage fails.
+
+```js
+// Load last location from localStorage
+    loadLastLocation() {
+        try {
+            const lastLocation = localStorage.getItem('lastLocation');
+            if (lastLocation) {
+                this.lastSearchedCity = lastLocation;
+            }
+        } catch (error) {
+            console.warn('Could not load location from localStorage:', error);
+        }
+    }
+
+    // Debounce function for search optimization
+    debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+```
+What does this block do?
+ans-
+✅ loadLastLocation()
+Tries to retrieve the last searched city from localStorage and save it to this.lastSearchedCity.
+Gracefully handles failure if localStorage isn’t available.
+
+✅ debounce(func, wait)
+Returns a version of func that delays execution until after wait ms of no calls.
+Useful for limiting API calls while typing (like in search inputs).
+
+```js
+// Initialize the app when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    // Initialize the app
+    const app = new WeatherApp();
+    
+    // Add some additional features
+    app.debouncedSearch = app.debounce(app.handleSearch.bind(app), 500);
+    
+    // Add input event listeners for real-time search suggestions (optional)
+    const searchInput = document.getElementById('searchInput');
+    const welcomeSearchInput = document.getElementById('welcomeSearchInput');
+    
+    searchInput?.addEventListener('input', (e) => {
+        if (e.target.value.length > 2) {
+            app.debouncedSearch(e.target.value);
+        }
+    });
+    
+    welcomeSearchInput?.addEventListener('input', (e) => {
+        if (e.target.value.length > 2) {
+            app.debouncedSearch(e.target.value);
+        }
+    });
+});
+
+// Add service worker for PWA capabilities (optional)
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+            .then(registration => {
+                console.log('SW registered: ', registration);
+            })
+            .catch(registrationError => {
+                console.log('SW registration failed: ', registrationError);
+            });
+    });
+}
+```
+What does this block do?
+ans-
+1) Initializes the app and adds real-time search
+2) Registers a service worker for offline/PWA features
+
+1. DOMContentLoaded Listener: Initialize the App
+
+    Waits for the DOM to fully load.
+
+    Creates a new WeatherApp() instance.
+
+    Sets up a debounced version of the search function (delays search by 500ms to reduce API calls).
+
+    Adds input listeners on both searchInput and welcomeSearchInput:
+
+        If the user types more than 2 characters, it triggers the debounced search.
+
+2. Service Worker Registration (Progressive Web App support)
+
+    After the page fully loads, it checks if the browser supports service workers.
+
+    If yes, it tries to register the sw.js file.
+
+    Logs whether the registration succeeds or fails.        
+    
+
+
+
+```js
+// Add keyboard shortcuts
+document.addEventListener('keydown', (e) => {
+    // Ctrl/Cmd + K to focus search
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            searchInput.focus();
+        }
+    }
+    
+    // Escape to clear search
+    if (e.key === 'Escape') {
+        const searchInput = document.getElementById('searchInput');
+        const welcomeSearchInput = document.getElementById('welcomeSearchInput');
+        
+        if (searchInput) searchInput.value = '';
+        if (welcomeSearchInput) welcomeSearchInput.value = '';
+        
+        document.activeElement.blur();
+    }
+});
+
+// Add offline detection
+window.addEventListener('online', () => {
+    console.log('App is online');
+    // You could show a notification here
+});
+
+window.addEventListener('offline', () => {
+    console.log('App is offline');
+    // You could show a notification here
+});
+```
+What does this block do?
+ans-
+This block adds two key features:
+ 1. Keyboard Shortcuts
+
+It listens for key presses and:
+
+    Ctrl/Cmd + K → focuses the search input
+    (makes it easy to quickly start a new search without using the mouse)
+
+    Escape key → clears both search inputs and removes focus
+    (helps the user quickly cancel their input)
+
+ 2. Offline Detection
+
+It listens for network status changes:
+
+    When the app goes online, it logs "App is online"
+
+    When the app goes offline, it logs "App is offline"
+

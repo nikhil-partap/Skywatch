@@ -285,18 +285,6 @@ class WeatherApp {
         // Group forecast by day and get daily data
         const dailyForecast = this.getDailyForecast();   
         // this function takes the raw forecast data (which usually gives data every 3 hours), and groups it into daily summaries.
-        /* So instead of:                                You get this:
-        [   { time: 9 AM, temp: 30 },                    [{ date: "2025-07-29", temp: 33, weatherId: 801, description: "scattered clouds" },
-            { time: 12 PM, temp: 32 },                    { date: "2025-07-30", temp: 32, weatherId: 801, description: "scattered clouds" },
-            { time: 3 PM, temp: 31 },                     { date: "2025-07-31", temp: 31, weatherId: 801, description: "scattered clouds" },
-            { time: 6 PM, temp: 29 },                     { date: "2025-08-01", temp: 29, weatherId: 801, description: "scattered clouds" },
-            { time: 9 PM, temp: 28 },                     { date: "2025-08-02", temp: 28, weatherId: 801, description: "scattered clouds" },
-            { time: 12 AM, temp: 27 },
-            { time: 3 AM, temp: 26 },
-            { time: 6 AM, temp: 25 },
-        ]
-        */
-       
         
         dailyForecast.forEach(day => {
             const forecastCard = this.createForecastCard(day);
@@ -319,6 +307,18 @@ class WeatherApp {
         return card;
     }
 
+
+
+    // this function takes the raw forecast data (which usually gives data every 3 hours), and groups it into daily summaries.
+        /* So instead of:                                You get this:
+        [   { time: 9 AM, temp: 30 },                    [{ date: "2025-07-29", temp: 33, weatherId: 801, description: "scattered clouds" },
+            { time: 12 PM, temp: 32 },                    { date: "2025-07-30", temp: 32, weatherId: 801, description: "scattered clouds" },
+            { time: 3 PM, temp: 31 },                     { date: "2025-07-31", temp: 31, weatherId: 801, description: "scattered clouds" },
+            { time: 6 PM, temp: 29 },                     { date: "2025-08-01", temp: 29, weatherId: 801, description: "scattered clouds" },
+            { time: 9 PM, temp: 28 },                     { date: "2025-08-02", temp: 28, weatherId: 801, description: "scattered clouds" },
+            { time: 12 AM, temp: 27 },
+            { time: 3 AM, temp: 26 },
+            { time: 6 AM, temp: 25 },]*/
     // Get daily forecast from 3-hour data
     getDailyForecast() {
         const dailyData = {};
