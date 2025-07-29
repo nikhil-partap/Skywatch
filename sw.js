@@ -1,10 +1,14 @@
 // Service Worker for SkyWatch Weather App
 const CACHE_NAME = 'skywatch-v1.0.0';
-const urlsToCache = [
-    '/',
-    '/index.html',
-    '/style.css',
-    '/script.js',
+
+const BASE_PATH = self.location.pathname.replace(/\/sw\.js$/, '') || '.';
+const localFiles = [
+    './index.html',
+    './style.css',
+    './script.js'
+];
+
+const externalFiles = [
     'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap',
     'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'
 ];
@@ -14,11 +18,15 @@ self.addEventListener('install', event => {
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then(cache => {
-                console.log('Opened cache');
-                return cache.addAll(urlsToCache);
-            })
-            .catch(error => {
-                console.log('Cache installation failed:', error);
+                return cache.addAll(localFiles)
+                    .then(() => {
+                        // Try caching externals, but don't crash if they fail
+                        return Promise.allSettled(
+                            externalFiles.map(url => fetch(url).then(res => {
+                                if (res.ok) cache.put(url, res.clone());
+                            }))
+                        );
+                    });
             })
     );
 });

@@ -302,3 +302,97 @@ fetch the forcast the 5 day forcast using either the cityName or through coords 
 ```
 What does this block do?
 ans-
+1) Declares an asynchronous function that takes a url string.
+2) Creates an AbortController, which allows you to cancel the fetch request manually. Starts a 10-second timer: if the request isn't completed in 10s, it calls controller.abort().
+3) Sends the GET request with standard JSON headers.
+signal: controller.signal ties this request to the abort timer. If the timer calls controller.abort(), the request is canceled with an AbortError.
+4) after getting a response (success or failure), cancel the timer to prevent unnecessary aborts.
+5) if .ok is false then the error handeling block handles all HTTP error responses.
+6) Success case : if the response is ok then the data is returned.
+7) non-HTTP errors  : client-side timeout caused by the 10s setTimeout.
+TypeError + "fetch" in message = likely causes: No internet, DNS issue, Server unreachable
+Any other unexpected errors are re-thrown.
+
+```js
+// Display weather data in the UI
+    displayWeatherData() {
+        this.hideAllStates();
+        this.showWeatherDisplay();
+        
+        this.updateCurrentWeather();
+        this.updateForecast();
+        this.updateAdditionalInfo();
+        
+        // Add animation delay for smooth transitions
+        setTimeout(() => {
+            document.getElementById('weatherDisplay').classList.add('animate');
+        }, 100);
+    }
+
+    // Update current weather display
+    updateCurrentWeather() {
+        const weather = this.currentWeather;
+        
+        // Update location
+        document.getElementById('cityName').textContent = weather.name;
+        document.getElementById('countryName').textContent = weather.sys.country;
+        document.getElementById('dateTime').textContent = this.formatDateTime(weather.dt, weather.timezone);
+
+        // Update temperature and description
+        document.getElementById('temperature').textContent = Math.round(weather.main.temp);
+        document.getElementById('weatherDescription').textContent = weather.weather[0].description;
+        document.getElementById('weatherIcon').className = `weather-icon ${this.getWeatherIcon(weather.weather[0].id)}`;
+
+        // Update weather details
+        document.getElementById('feelsLike').textContent = `${Math.round(weather.main.feels_like)}°C`;
+        document.getElementById('humidity').textContent = `${weather.main.humidity}%`;
+        document.getElementById('windSpeed').textContent = `${this.convertWindSpeed(weather.wind.speed)}`;
+        document.getElementById('visibility').textContent = `${(weather.visibility / 1000).toFixed(1)} km`;
+    }
+```
+These two functions are responsible for showing the weather data on your screen after it’s fetched from the API. They make sure:
+All sections are clean and updated
+The right values appear in the right HTML elements
+It looks smooth with animation
+
+```js
+// Update forecast display
+    updateForecast() {
+        const forecastContainer = document.getElementById('forecastContainer');
+        forecastContainer.innerHTML = '';
+
+        // Group forecast by day and get daily data
+        const dailyForecast = this.getDailyForecast();
+        
+        dailyForecast.forEach(day => {
+            const forecastCard = this.createForecastCard(day);
+            forecastContainer.appendChild(forecastCard);
+        });
+    }
+
+    // Create forecast card element
+    createForecastCard(day) {
+        const card = document.createElement('div');
+        card.className = 'forecast-card';
+        
+        card.innerHTML = `
+            <div class="forecast-date">${this.formatDate(day.date)}</div>
+            <i class="forecast-icon ${this.getWeatherIcon(day.weatherId)}"></i>
+            <div class="forecast-temp">${Math.round(day.temp)}°C</div>
+            <div class="forecast-desc">${day.description}</div>
+        `;
+        
+        return card;
+    }
+```
+What This Code Does
+ans- 
+This code updates the 5-day weather forecast section on the web page.
+It gets the daily forecast data, creates little weather cards for each day (like "Tuesday – Sunny – 32°C"), and adds them to the webpage.
+
+What does this block do?
+ans- 
+1) removes everything inside forecastContainer, in case there were old forecast cards already displayed.
+2) calls a function getDailyForecast() (written somewhere else in your code).
+It takes the raw forecast data (which usually gives data every 3 hours), and groups it into daily summaries.
+3) Create and add each forecast card 

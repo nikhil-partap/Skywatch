@@ -188,6 +188,9 @@ class WeatherApp {
 
     // Make API request with error handling
     async makeApiRequest(url) {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
+
         try {
             const response = await fetch(url, {
                 method: 'GET',
@@ -195,9 +198,12 @@ class WeatherApp {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json'
                 },
-                timeout: 10000
+                signal: controller.signal    // fetch() does not support a built-in timeout. It will wait forever unless you cancel it. That's why this external controller is needed.
             });
+
+            clearTimeout(timeoutId);
             
+            // error handling block
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
                 
@@ -212,15 +218,22 @@ class WeatherApp {
                 } else if (response.status === 502 || response.status === 503) {
                     throw new Error(errorData.details || 'Weather service temporarily unavailable. Please try again later.');
                 } else if (response.status === 504) {
-                    throw new Error(errorData.details || 'Request timeout. Please try again.');
+                    throw new Error(errorData.details || 'Request timeout. Please try again.');  // works only if the server sends a 504 status code in its response.
                 } else {
                     throw new Error(errorData.details || `Request failed with status ${response.status}`);
                 }
             }
-
+            // Success case : if the response is ok then the data is returned.
             const data = await response.json();
             return data;
-        } catch (error) {
+        }
+        // Catch block – non-HTTP errors
+        catch (error) {
+            
+            if (error.name === 'AbortError') {
+                throw new Error('Request timed out. Please try again.');   // adding new error message for the abort error ()
+            }
+
             if (error.name === 'TypeError' && error.message.includes('fetch')) {
                 throw new Error('Network error. Please check your internet connection and ensure the backend server is running.');
             }
@@ -270,7 +283,20 @@ class WeatherApp {
         forecastContainer.innerHTML = '';
 
         // Group forecast by day and get daily data
-        const dailyForecast = this.getDailyForecast();
+        const dailyForecast = this.getDailyForecast();   
+        // this function takes the raw forecast data (which usually gives data every 3 hours), and groups it into daily summaries.
+        /* So instead of:                                You get this:
+        [   { time: 9 AM, temp: 30 },                    [{ date: "2025-07-29", temp: 33, weatherId: 801, description: "scattered clouds" },
+            { time: 12 PM, temp: 32 },                    { date: "2025-07-30", temp: 32, weatherId: 801, description: "scattered clouds" },
+            { time: 3 PM, temp: 31 },                     { date: "2025-07-31", temp: 31, weatherId: 801, description: "scattered clouds" },
+            { time: 6 PM, temp: 29 },                     { date: "2025-08-01", temp: 29, weatherId: 801, description: "scattered clouds" },
+            { time: 9 PM, temp: 28 },                     { date: "2025-08-02", temp: 28, weatherId: 801, description: "scattered clouds" },
+            { time: 12 AM, temp: 27 },
+            { time: 3 AM, temp: 26 },
+            { time: 6 AM, temp: 25 },
+        ]
+        */
+       
         
         dailyForecast.forEach(day => {
             const forecastCard = this.createForecastCard(day);
