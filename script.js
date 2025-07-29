@@ -159,8 +159,18 @@ class WeatherApp {
         }
 
         this.showLoadingState();
+        
+        // Set a timeout for the entire search process
+        const searchTimeout = setTimeout(() => {
+            console.warn('Search request timed out - clearing state');
+            this.hideAllStates();
+            this.showWelcomeState();
+        }, 25000); // 25 seconds total timeout for search
+        
         try {
             await this.fetchWeatherData(cityName);
+            clearTimeout(searchTimeout); // Clear timeout on success
+            
             this.lastSearchedCity = cityName;
             this.saveLastLocation(cityName);
             
@@ -170,6 +180,7 @@ class WeatherApp {
             // Smooth scroll to weather display
             this.smoothScrollToWeather();
         } catch (error) {
+            clearTimeout(searchTimeout); // Clear timeout on error
             console.error('Search error:', error);
             this.showError(error.message);
         }
@@ -190,8 +201,18 @@ class WeatherApp {
         this.isGettingLocation = true;
         this.showLoadingState();
         
+        // Set a global timeout for the entire location process
+        const locationTimeout = setTimeout(() => {
+            console.warn('Location request timed out - clearing state');
+            this.isGettingLocation = false;
+            this.hideAllStates();
+            this.showWelcomeState();
+        }, 15000); // 15 seconds total timeout
+        
         try {
             const position = await this.getCurrentPosition();
+            clearTimeout(locationTimeout); // Clear timeout on success
+            
             const { latitude, longitude } = position.coords;
             await this.fetchWeatherDataByCoords(latitude, longitude);
             
@@ -207,14 +228,23 @@ class WeatherApp {
             // Smooth scroll to weather display
             this.smoothScrollToWeather();
         } catch (error) {
+            clearTimeout(locationTimeout); // Clear timeout on error
+            
             console.warn('Location access failed:', error.message);
-            // Don't show error for location permission issues, just log them
+            
+            // Handle different types of location errors
             if (error.message.includes('permission') || error.message.includes('denied')) {
                 console.log('Location permission denied by user');
+                this.showError('Location access denied. Please enable location permissions in your browser settings.');
             } else if (error.message.includes('unavailable')) {
                 console.log('Location information temporarily unavailable');
+                this.showError('Location service temporarily unavailable. Please try again in a few moments.');
+            } else if (error.message.includes('timeout')) {
+                console.log('Location request timed out');
+                this.showError('Location request timed out. Please check your internet connection and try again.');
             } else {
-                this.showError('Unable to get your location. Please check your permissions.');
+                console.log('Unknown location error:', error.message);
+                this.showError('Unable to get your location. Please try searching for a city instead.');
             }
         } finally {
             this.isGettingLocation = false;
@@ -315,7 +345,7 @@ class WeatherApp {
 
     async makeApiRequest(url) {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000);
+        const timeoutId = setTimeout(() => controller.abort(), 15000); // Increased to 15 seconds
 
         try {
             const response = await fetch(url, {
@@ -357,7 +387,7 @@ class WeatherApp {
         catch (error) {
             
             if (error.name === 'AbortError') {
-                throw new Error('Request timed out. Please try again.');   // adding new error message for the abort error ()
+                throw new Error('Request timed out. Please check your internet connection and try again.');   // adding new error message for the abort error ()
             }
 
             if (error.name === 'TypeError' && error.message.includes('fetch')) {
