@@ -14,6 +14,68 @@ class WeatherApp {
         this.bindEvents();       // this function is responsible for the working of all the buttons and inputs in the app it connects the event listeners to the buttons and inputs 
     }
 
+    // ===== GA4 TRACKING FUNCTIONS =====
+    
+    // Track weather search event
+    trackWeatherSearch(city, method, coordinates = null) {
+        if (typeof gtag === 'undefined') {
+            console.warn('Google Analytics not loaded');
+            return;
+        }
+
+        const eventData = {
+            event_category: 'weather_search',
+            event_label: method,
+            city: city,
+            method: method,
+            timestamp: Date.now(),
+            user_agent: navigator.userAgent,
+            language: navigator.language,
+            platform: navigator.platform,
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+            screen_width: screen.width,
+            screen_height: screen.height
+        };
+
+        // Add coordinates for geolocation searches
+        if (coordinates && coordinates.lat && coordinates.lon) {
+            eventData.lat = coordinates.lat;
+            eventData.lon = coordinates.lon;
+        }
+
+        // Send event to GA4
+        gtag('event', 'weather_search', eventData);
+        
+        console.log('Weather search tracked:', eventData);
+    }
+
+    // Get user coordinates for tracking
+    getUserCoordinates() {
+        return new Promise((resolve, reject) => {
+            if (!navigator.geolocation) {
+                reject(new Error('Geolocation not supported'));
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    resolve({
+                        lat: position.coords.latitude,
+                        lon: position.coords.longitude
+                    });
+                },
+                (error) => {
+                    reject(error);
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 600000 // 10 minutes
+                }
+            );
+        });
+    }
+
     // ===== DOM ELEMENT CACHING =====
     cacheDOMElements() {
         // Search elements
@@ -101,6 +163,9 @@ class WeatherApp {
             this.lastSearchedCity = cityName;
             this.saveLastLocation(cityName);
             
+            // Track the weather search
+            this.trackWeatherSearch(cityName.trim(), 'typed');
+            
             // Smooth scroll to weather display
             this.smoothScrollToWeather();
         } catch (error) {
@@ -121,6 +186,15 @@ class WeatherApp {
             const position = await this.getCurrentPosition();
             const { latitude, longitude } = position.coords;
             await this.fetchWeatherDataByCoords(latitude, longitude);
+            
+            // Get city name from the fetched weather data for tracking
+            const cityName = this.currentWeather ? this.currentWeather.name : 'Unknown Location';
+            
+            // Track the weather search with coordinates
+            this.trackWeatherSearch(cityName, 'geolocation', {
+                lat: latitude,
+                lon: longitude
+            });
             
             // Smooth scroll to weather display
             this.smoothScrollToWeather();

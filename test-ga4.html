@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GA4 Test - SkyWatch</title>
+    
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-DPD9X33W43"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-DPD9X33W43', {
+            send_page_view: false
+        });
+    </script>
+</head>
+<body>
+    <h1>GA4 Tracking Test</h1>
+    <p>This page tests Google Analytics 4 tracking for SkyWatch weather app.</p>
+    
+    <button onclick="testTracking()">Test Weather Search Tracking</button>
+    <button onclick="testGeolocationTracking()">Test Geolocation Tracking</button>
+    
+    <div id="results"></div>
+
+    <script>
+        function testTracking() {
+            // Simulate weather search tracking
+            const eventData = {
+                event_category: 'weather_search',
+                event_label: 'typed',
+                city: 'London',
+                method: 'typed',
+                timestamp: Date.now(),
+                user_agent: navigator.userAgent,
+                language: navigator.language,
+                platform: navigator.platform,
+                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                screen_width: screen.width,
+                screen_height: screen.height
+            };
+
+            gtag('event', 'weather_search', eventData);
+            document.getElementById('results').innerHTML = '<p>✅ Typed search tracked: ' + JSON.stringify(eventData, null, 2) + '</p>';
+        }
+
+        function testGeolocationTracking() {
+            // Simulate geolocation tracking
+            const eventData = {
+                event_category: 'weather_search',
+                event_label: 'geolocation',
+                city: 'Current Location',
+                method: 'geolocation',
+                timestamp: Date.now(),
+                user_agent: navigator.userAgent,
+                language: navigator.language,
+                platform: navigator.platform,
+                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                screen_width: screen.width,
+                screen_height: screen.height,
+                lat: 51.5074,
+                lon: -0.1278
+            };
+
+            gtag('event', 'weather_search', eventData);
+            document.getElementById('results').innerHTML = '<p>✅ Geolocation search tracked: ' + JSON.stringify(eventData, null, 2) + '</p>';
+        }
+
+        // Test GA4 loading
+        window.addEventListener('load', function() {
+            if (typeof gtag !== 'undefined') {
+                console.log('✅ GA4 loaded successfully');
+                document.getElementById('results').innerHTML += '<p>✅ Google Analytics 4 loaded successfully</p>';
+            } else {
+                console.error('❌ GA4 not loaded');
+                document.getElementById('results').innerHTML += '<p>❌ Google Analytics 4 not loaded</p>';
+            }
+        });
+    </script>
+</body>
+</html> 
