@@ -71,6 +71,7 @@
                 </div>
                 <button id="locationBtn" class="location-btn" title="Use current location" aria-label="Use current location">
                     <i class="fas fa-location-arrow" aria-hidden="true"></i>
+                    <span class="location-text">Location</span>
                 </button>
             </div>
         </header>
@@ -197,15 +198,18 @@
                             Use My Location
                         </button>
                         <p>or</p>
-                        <div class="search-box welcome-search">
-                            <input 
-                                type="text" 
-                                id="welcomeSearchInput" 
-                                placeholder="Search for a city..." 
-                                autocomplete="off"
-                                aria-label="Search for a city">
+                        <div class="welcome-search">
+                            <div class="search-box">
+                                <input 
+                                    type="text" 
+                                    id="welcomeSearchInput" 
+                                    placeholder="Search for a city..." 
+                                    autocomplete="off"
+                                    aria-label="Search for a city">
+                            </div>
                             <button id="welcomeSearchBtn" class="search-btn" aria-label="Search">
                                 <i class="fas fa-search" aria-hidden="true"></i>
+                                Search
                             </button>
                         </div>
                     </div>
