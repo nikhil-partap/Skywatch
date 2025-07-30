@@ -27,39 +27,53 @@ class WeatherApp {
         this.bindEvents();       // this function is responsible for the working of all the buttons and inputs in the app it connects the event listeners to the buttons and inputs 
     }
 
-    // ===== GA4 TRACKING FUNCTIONS =====
+    // ===== CUSTOM LOGGING FUNCTIONS =====
     
-    // Track weather search event
-    trackWeatherSearch(city, method, coordinates = null) {
-        if (typeof gtag === 'undefined') {
-            console.warn('Google Analytics not loaded');
-            return;
+    // Log event to backend
+    async logEvent(data) {
+        try {
+            const response = await fetch(`${this.backendUrl}/log`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            
+            if (!response.ok) {
+                console.warn('Failed to log event:', response.status);
+            }
+        } catch (error) {
+            console.warn('Error logging event:', error);
         }
+    }
 
-        const eventData = {
-            event_category: 'weather_search',
-            event_label: method,
-            city: city,
-            method: method,
-            timestamp: Date.now(),
-            user_agent: navigator.userAgent,
-            language: navigator.language,
-            platform: navigator.platform,
-            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-            screen_width: screen.width,
-            screen_height: screen.height
-        };
-
-        // Add coordinates for geolocation searches
-        if (coordinates && coordinates.lat && coordinates.lon) {
-            eventData.lat = coordinates.lat;
-            eventData.lon = coordinates.lon;
-        }
-
-        // Send event to GA4
-        gtag('event', 'weather_search', eventData);
+    // Detect device type for responsive design insights
+    getDeviceType() {
+        const userAgent = navigator.userAgent.toLowerCase();
+        const screenWidth = window.innerWidth;
         
-        console.log('Weather search tracked:', eventData);
+        // Mobile detection
+        if (/mobile|android|iphone|ipad|ipod|blackberry|windows phone/i.test(userAgent)) {
+            return 'mobile';
+        }
+        
+        // Tablet detection
+        if (/tablet|ipad/i.test(userAgent) || (screenWidth >= 768 && screenWidth <= 1024)) {
+            return 'tablet';
+        }
+        
+        // Desktop detection
+        if (screenWidth > 1024) {
+            return 'desktop';
+        }
+        
+        // Fallback based on screen width
+        if (screenWidth < 768) {
+            return 'mobile';
+        } else if (screenWidth < 1024) {
+            return 'tablet';
+        } else {
+            return 'desktop';
+        }
     }
 
     // Get user coordinates for tracking
@@ -186,8 +200,20 @@ class WeatherApp {
             this.lastSearchedCity = cityName;
             this.saveLastLocation(cityName);
             
-            // Track the weather search
-            this.trackWeatherSearch(cityName.trim(), 'typed');
+            // Log the search event
+            this.logEvent({
+                event: 'search',
+                method: 'typed',
+                query: cityName.trim(),
+                device: this.getDeviceType(),
+                viewport: { width: window.innerWidth, height: window.innerHeight },
+                screen: { 
+                    width: screen.width, 
+                    height: screen.height, 
+                    pixelRatio: window.devicePixelRatio || 1 
+                },
+                userAgent: navigator.userAgent
+            });
             
             // Smooth scroll to weather display
             this.smoothScrollToWeather();
@@ -228,11 +254,22 @@ class WeatherApp {
             const { latitude, longitude } = position.coords;
             await this.fetchWeatherDataByCoords(latitude, longitude);
             
-            // Get city name from the fetched weather data for tracking
+            // Get city name from the fetched weather data for logging
             const cityName = this.currentWeather ? this.currentWeather.name : 'Unknown Location';
             
-            // Track the weather search with coordinates
-            this.trackWeatherSearch(cityName, 'geolocation', {
+            // Log the location search event
+            this.logEvent({
+                event: 'search',
+                method: 'location',
+                query: cityName,
+                device: this.getDeviceType(),
+                viewport: { width: window.innerWidth, height: window.innerHeight },
+                screen: { 
+                    width: screen.width, 
+                    height: screen.height, 
+                    pixelRatio: window.devicePixelRatio || 1 
+                },
+                userAgent: navigator.userAgent,
                 lat: latitude,
                 lon: longitude
             });

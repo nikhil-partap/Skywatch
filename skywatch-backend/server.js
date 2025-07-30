@@ -4,6 +4,8 @@ const helmet = require('helmet');
 const compression = require('compression');
 const rateLimit = require('express-rate-limit');
 const axios = require('axios');
+const fs = require('fs');
+const path = require('path');
 require('dotenv').config();
 
 const app = express();
@@ -309,6 +311,28 @@ app.get('/forecast', async (req, res) => {
     }
 });
 
+// Analytics logging endpoint
+app.post('/log', (req, res) => {
+    try {
+        const record = {
+            timestamp: new Date().toISOString(),
+            clientIP: req.headers['x-forwarded-for'] || req.socket.remoteAddress,
+            ...req.body
+        };
+        
+        const logFile = path.join(__dirname, 'logs.json');
+        fs.appendFileSync(logFile, JSON.stringify(record) + '\n');
+        
+        res.json({ status: 'ok' });
+    } catch (error) {
+        console.error('Logging error:', error);
+        res.status(500).json({ 
+            status: 'error', 
+            message: 'Failed to log event' 
+        });
+    }
+});
+
 // 404 handler
 app.use('*', (req, res) => {
     res.status(404).json({
@@ -317,7 +341,8 @@ app.use('*', (req, res) => {
         availableEndpoints: {
             'GET /health': 'Health check endpoint',
             'GET /weather': 'Current weather data (query params: city OR lat,lon)',
-            'GET /forecast': '5-day forecast data (query params: city OR lat,lon)'
+            'GET /forecast': '5-day forecast data (query params: city OR lat,lon)',
+            'POST /log': 'Analytics logging endpoint'
         }
     });
 });
