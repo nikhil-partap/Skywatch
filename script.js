@@ -1,4 +1,16 @@
-// Weather App - Professional Implementation
+// SkyWatch Weather App - Professional Version 2.0.0
+// Cache-busting mechanism to ensure fresh CSS loading
+(function() {
+    // Force reload CSS if it's cached
+    var links = document.querySelectorAll('link[rel="stylesheet"]');
+    links.forEach(function(link) {
+        if (link.href.includes('style.css') && !link.href.includes('?v=')) {
+            link.href = link.href + '?v=' + Date.now();
+        }
+    });
+})();
+
+// Weather App Class
 class WeatherApp {
     constructor() {
         // Backend API configuration - update this URL when you deploy your backend

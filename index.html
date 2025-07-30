@@ -6,8 +6,13 @@
     <meta name="description" content="Professional Weather App - Get real-time weather information for any location with detailed forecasts and current conditions">
     <meta name="keywords" content="weather, forecast, temperature, humidity, wind, weather app, skywatch">
     <meta name="author" content="Nikhil Pratap Singh">
-    <meta name="theme-color" content="#667eea">
+    <meta name="theme-color" content="#059669">
     <meta name="robots" content="index, follow">
+    
+    <!-- Cache Control - Force fresh content -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
@@ -36,11 +41,24 @@
         });
     </script>
     
+    <!-- Force CSS reload to prevent caching issues -->
+    <script>
+        // Force reload CSS to prevent caching issues
+        (function() {
+            var links = document.querySelectorAll('link[rel="stylesheet"]');
+            links.forEach(function(link) {
+                if (link.href.includes('style.css')) {
+                    link.href = link.href.split('?')[0] + '?v=' + Date.now();
+                }
+            });
+        })();
+    </script>
+    
     <!-- Preload critical resources -->
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" as="style">
     <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style">
     
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=2.0.0">
     <link rel="manifest" href="./manifest.json">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -69,10 +87,12 @@
                         <i class="fas fa-search" aria-hidden="true"></i>
                     </button>
                 </div>
-                <button id="locationBtn" class="location-btn" title="Use current location" aria-label="Use current location">
-                    <i class="fas fa-location-arrow" aria-hidden="true"></i>
-                    <span class="location-text">Location</span>
-                </button>
+                <div class="location-btn-container">
+                    <button id="locationBtn" class="location-btn" title="Use current location" aria-label="Use current location">
+                        <i class="fas fa-location-arrow" aria-hidden="true"></i>
+                        <span class="location-text">Location</span>
+                    </button>
+                </div>
             </div>
         </header>
 
@@ -206,11 +226,12 @@
                                     placeholder="Search for a city..." 
                                     autocomplete="off"
                                     aria-label="Search for a city">
+                                    <button id="welcomeSearchBtn" class="search-btn" aria-label="Search">
+                                        <i class="fas fa-search" aria-hidden="true"></i>
+                                        Search
+                                    </button>
                             </div>
-                            <button id="welcomeSearchBtn" class="search-btn" aria-label="Search">
-                                <i class="fas fa-search" aria-hidden="true"></i>
-                                Search
-                            </button>
+                            
                         </div>
                     </div>
                 </div>
@@ -227,6 +248,6 @@
         </footer>
     </div>
 
-    <script src="script.js"></script>
+    <script src="script.js?v=2.0.0"></script>
 </body>
 </html>

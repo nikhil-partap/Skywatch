@@ -1,5 +1,5 @@
 // Service Worker for SkyWatch Weather App
-const CACHE_NAME = 'skywatch-v1.0.2';
+const CACHE_NAME = 'skywatch-v2.0.0';
 
 // Handle GitHub Pages deployment
 const isGitHubPages = self.location.hostname === 'nikhil-partap.github.io';
