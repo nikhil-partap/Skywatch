@@ -727,20 +727,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const app = new WeatherApp();
     
     // Add some additional features
-    app.debouncedSearch = app.debounce(app.handleSearch.bind(app), 500);
+    app.debouncedSearch = app.debounce(app.handleSearch.bind(app), 4000);
     
     // Add input event listeners for real-time search suggestions (optional)
     const searchInput = document.getElementById('searchInput');
     const welcomeSearchInput = document.getElementById('welcomeSearchInput');
     
     searchInput?.addEventListener('input', (e) => {
-        if (e.target.value.length > 2) {
+        if (e.target.value.length > 6) {
             app.debouncedSearch(e.target.value);
         }
     });
     
     welcomeSearchInput?.addEventListener('input', (e) => {
-        if (e.target.value.length > 2) {
+        if (e.target.value.length > 40) {
             app.debouncedSearch(e.target.value);
         }
     });
