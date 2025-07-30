@@ -605,8 +605,13 @@ class WeatherApp {
     }
 
     formatTime(timestamp, timezone) {
-        const date = new Date((timestamp + timezone) * 1000);
-        return date.toLocaleTimeString('en-US', {
+        // OpenWeatherMap provides sunrise/sunset in UTC
+        // We need to convert to local time using the timezone offset
+        const date = new Date(timestamp * 1000);
+        const utcTime = date.getTime() + (timezone * 1000);
+        const localDate = new Date(utcTime);
+        
+        return localDate.toLocaleTimeString('en-US', {
             hour: '2-digit',
             minute: '2-digit',
             hour12: false
