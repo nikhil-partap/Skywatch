@@ -9,11 +9,6 @@
     <meta name="theme-color" content="#059669">
     <meta name="robots" content="index, follow">
     
-    <!-- Cache Control - Force fresh content -->
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
-    
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://nikhil-partap.github.io/Skywatch/">
@@ -30,27 +25,11 @@
     
     <title>SkyWatch - Professional Weather App</title>
     
-
-    
-    <!-- Force CSS reload to prevent caching issues -->
-    <script>
-        // Force reload CSS to prevent caching issues
-        (function() {
-            var links = document.querySelectorAll('link[rel="stylesheet"]');
-            links.forEach(function(link) {
-                if (link.href.includes('style.css')) {
-                    link.href = link.href.split('?')[0] + '?v=' + Date.now();
-                }
-            });
-        })();
-    </script>
-    
     <!-- Preload critical resources -->
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" as="style">
     <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style">
     
-    <link rel="stylesheet" href="style.css?v=2.0.0">
-    <link rel="manifest" href="./manifest.json">
+    <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     

@@ -1,51 +1,22 @@
-// SkyWatch Weather App - Professional Version 2.0.0
-// Cache-busting mechanism to ensure fresh CSS loading
-(function() {
-    // Force reload CSS if it's cached
-    var links = document.querySelectorAll('link[rel="stylesheet"]');
-    links.forEach(function(link) {
-        if (link.href.includes('style.css') && !link.href.includes('?v=')) {
-            link.href = link.href + '?v=' + Date.now();
-        }
-    });
-})();
-
-// Weather App Class
+// SkyWatch Weather App
 class WeatherApp {
     constructor() {
-        // Backend API configuration - update this URL when you deploy your backend
-        this.backendUrl = 'https://skywatch-336o.onrender.com'; // Change this to your deployed backend URL
+        // Backend API configuration
+        this.backendUrl = 'https://skywatch-336o.onrender.com';
         this.currentWeather = null;
         this.forecast = null;
         this.lastSearchedCity = null;
-        this.isGettingLocation = false; // Track location request state
+        this.isGettingLocation = false;
 
         // Cache DOM elements for better performance
         this.cacheDOMElements();
         
-        this.initializeApp();    // this function is responsible for showing the welcome page and loading the last location from localStorage without it we will load a blank welcome page
-        this.bindEvents();       // this function is responsible for the working of all the buttons and inputs in the app it connects the event listeners to the buttons and inputs 
+        this.initializeApp();
+        this.bindEvents();
     }
 
     // ===== CUSTOM LOGGING FUNCTIONS =====
     
-    // Log event to backend
-    async logEvent(data) {
-        try {
-            const response = await fetch(`${this.backendUrl}/log`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            });
-            
-            if (!response.ok) {
-                console.warn('Failed to log event:', response.status);
-            }
-        } catch (error) {
-            console.warn('Error logging event:', error);
-        }
-    }
-
     // Detect device type for responsive design insights
     getDeviceType() {
         const userAgent = navigator.userAgent.toLowerCase();
@@ -76,7 +47,7 @@ class WeatherApp {
         }
     }
 
-    // Get user coordinates for tracking
+    // Get user coordinates for weather data
     getUserCoordinates() {
         return new Promise((resolve, reject) => {
             if (!navigator.geolocation) {
@@ -258,21 +229,6 @@ class WeatherApp {
             // Show success toast
             this.showToast(`Weather data loaded for ${cityName}`, 'success');
             
-            // Log the search event
-            this.logEvent({
-                event: 'search',
-                method: 'typed',
-                query: cityName.trim(),
-                device: this.getDeviceType(),
-                viewport: { width: window.innerWidth, height: window.innerHeight },
-                screen: { 
-                    width: screen.width, 
-                    height: screen.height, 
-                    pixelRatio: window.devicePixelRatio || 1 
-                },
-                userAgent: navigator.userAgent
-            });
-            
             // Smooth scroll to weather display
             this.smoothScrollToWeather();
         } catch (error) {
@@ -340,23 +296,6 @@ class WeatherApp {
             
             // Show success toast
             this.showToast(`Weather data loaded for your location`, 'success');
-            
-            // Log the location search event
-            this.logEvent({
-                event: 'search',
-                method: 'location',
-                query: cityName,
-                device: this.getDeviceType(),
-                viewport: { width: window.innerWidth, height: window.innerHeight },
-                screen: { 
-                    width: screen.width, 
-                    height: screen.height, 
-                    pixelRatio: window.devicePixelRatio || 1 
-                },
-                userAgent: navigator.userAgent,
-                lat: latitude,
-                lon: longitude
-            });
             
             // Smooth scroll to weather display
             this.smoothScrollToWeather();
@@ -814,23 +753,9 @@ class WeatherApp {
             console.warn('Could not load location from localStorage:', error);
         }
     }
-
-    // ===== UTILITY FUNCTIONS =====
-    debounce(func, wait) {
-        let timeout;
-        return function executedFunction(...args) {
-            const later = () => {
-                clearTimeout(timeout);
-                func(...args);
-            };
-            clearTimeout(timeout);
-            timeout = setTimeout(later, wait);
-        };
-    }
 }
 
 // Initialize the app when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    // Initialize the app
-    const app = new WeatherApp();
+    new WeatherApp();
 });

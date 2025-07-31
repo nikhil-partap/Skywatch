@@ -67,16 +67,6 @@ app.use('/weather', limiter);
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Health check endpoint
-app.get('/health', (req, res) => {
-    res.status(200).json({
-        status: 'OK',
-        timestamp: new Date().toISOString(),
-        uptime: process.uptime(),
-        environment: process.env.NODE_ENV || 'development'
-    });
-});
-
 // Weather endpoint
 app.get('/weather', async (req, res) => {
     try {
@@ -98,11 +88,12 @@ app.get('/weather', async (req, res) => {
         if (!apiKey) {
             console.error('OpenWeatherMap API key not found in environment variables');
             return res.status(500).json({
-                error: 'Server configuration error. Please contact administrator.'
+                error: 'Server configuration error',
+                details: 'Weather service is not properly configured.'
             });
         }
 
-        // Build API URL based on input type
+        // Build API URL
         let apiUrl;
         if (city) {
             apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${apiKey}&units=metric`;
@@ -110,52 +101,26 @@ app.get('/weather', async (req, res) => {
             apiUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`;
         }
 
-        // Make request to OpenWeatherMap API
+        // Make API request
         const response = await axios.get(apiUrl, {
-            timeout: 10000, // 10 second timeout
-            headers: {
-                'User-Agent': 'SkyWatch-Weather-App/1.0'
-            }
+            timeout: 10000
         });
 
-        // Transform the response to include additional metadata
-        const weatherData = {
-            ...response.data,
-            metadata: {
-                timestamp: new Date().toISOString(),
-                source: 'OpenWeatherMap API',
-                query: city ? { city } : { lat, lon }
-            }
-        };
-
-        // Set cache headers (weather data is typically valid for 10 minutes)
-        res.set({
-            'Cache-Control': 'public, max-age=600', // 10 minutes
-            'ETag': `"${Date.now()}"`,
-            'Last-Modified': new Date().toUTCString()
-        });
-
-        res.json(weatherData);
-
+        res.json(response.data);
     } catch (error) {
-        console.error('Weather API Error:', error.message);
+        console.error('Weather API error:', error.message);
         
-        // Handle different types of errors
         if (error.response) {
-            // OpenWeatherMap API error
-            const status = error.response.status;
-            const data = error.response.data;
-            
-            switch (status) {
+            switch (error.response.status) {
                 case 400:
                     return res.status(400).json({
-                        error: 'Invalid request parameters',
-                        details: data.message || 'Please check your input parameters'
+                        error: 'Invalid request',
+                        details: 'Please check your input parameters.'
                     });
                 case 401:
                     return res.status(500).json({
-                        error: 'API authentication error',
-                        details: 'Server configuration issue'
+                        error: 'API key error',
+                        details: 'Weather service authentication failed.'
                     });
                 case 404:
                     return res.status(404).json({
@@ -175,19 +140,16 @@ app.get('/weather', async (req, res) => {
                     });
             }
         } else if (error.code === 'ECONNABORTED') {
-            // Timeout error
             return res.status(504).json({
                 error: 'Request timeout',
                 details: 'The weather service is taking too long to respond. Please try again.'
             });
         } else if (error.code === 'ENOTFOUND' || error.code === 'ECONNREFUSED') {
-            // Network error
             return res.status(503).json({
                 error: 'Service unavailable',
                 details: 'Unable to connect to the weather service. Please check your internet connection.'
             });
         } else {
-            // Unknown error
             return res.status(500).json({
                 error: 'Internal server error',
                 details: process.env.NODE_ENV === 'development' ? error.message : 'An unexpected error occurred'
@@ -196,7 +158,7 @@ app.get('/weather', async (req, res) => {
     }
 });
 
-// Forecast endpoint (optional)
+// Forecast endpoint
 app.get('/forecast', async (req, res) => {
     try {
         const { city, lat, lon } = req.query;
@@ -217,11 +179,12 @@ app.get('/forecast', async (req, res) => {
         if (!apiKey) {
             console.error('OpenWeatherMap API key not found in environment variables');
             return res.status(500).json({
-                error: 'Server configuration error. Please contact administrator.'
+                error: 'Server configuration error',
+                details: 'Weather service is not properly configured.'
             });
         }
 
-        // Build API URL based on input type
+        // Build API URL
         let apiUrl;
         if (city) {
             apiUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(city)}&appid=${apiKey}&units=metric`;
@@ -229,51 +192,26 @@ app.get('/forecast', async (req, res) => {
             apiUrl = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`;
         }
 
-        // Make request to OpenWeatherMap API
+        // Make API request
         const response = await axios.get(apiUrl, {
-            timeout: 10000,
-            headers: {
-                'User-Agent': 'SkyWatch-Weather-App/1.0'
-            }
+            timeout: 10000
         });
 
-        // Transform the response
-        const forecastData = {
-            ...response.data,
-            metadata: {
-                timestamp: new Date().toISOString(),
-                source: 'OpenWeatherMap API',
-                query: city ? { city } : { lat, lon }
-            }
-        };
-
-        // Set cache headers
-        res.set({
-            'Cache-Control': 'public, max-age=1800', // 30 minutes for forecast
-            'ETag': `"${Date.now()}"`,
-            'Last-Modified': new Date().toUTCString()
-        });
-
-        res.json(forecastData);
-
+        res.json(response.data);
     } catch (error) {
-        console.error('Forecast API Error:', error.message);
+        console.error('Forecast API error:', error.message);
         
-        // Handle errors similar to weather endpoint
         if (error.response) {
-            const status = error.response.status;
-            const data = error.response.data;
-            
-            switch (status) {
+            switch (error.response.status) {
                 case 400:
                     return res.status(400).json({
-                        error: 'Invalid request parameters',
-                        details: data.message || 'Please check your input parameters'
+                        error: 'Invalid request',
+                        details: 'Please check your input parameters.'
                     });
                 case 401:
                     return res.status(500).json({
-                        error: 'API authentication error',
-                        details: 'Server configuration issue'
+                        error: 'API key error',
+                        details: 'Weather service authentication failed.'
                     });
                 case 404:
                     return res.status(404).json({
@@ -311,26 +249,14 @@ app.get('/forecast', async (req, res) => {
     }
 });
 
-// Analytics logging endpoint
-app.post('/log', (req, res) => {
-    try {
-        const record = {
-            timestamp: new Date().toISOString(),
-            clientIP: req.headers['x-forwarded-for'] || req.socket.remoteAddress,
-            ...req.body
-        };
-        
-        const logFile = path.join(__dirname, 'logs.json');
-        fs.appendFileSync(logFile, JSON.stringify(record) + '\n');
-        
-        res.json({ status: 'ok' });
-    } catch (error) {
-        console.error('Logging error:', error);
-        res.status(500).json({ 
-            status: 'error', 
-            message: 'Failed to log event' 
-        });
-    }
+// Simple health check endpoint
+app.get('/health', (req, res) => {
+    res.status(200).json({
+        status: 'OK',
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime(),
+        environment: process.env.NODE_ENV || 'development'
+    });
 });
 
 // 404 handler
@@ -342,7 +268,6 @@ app.use('*', (req, res) => {
             'GET /health': 'Health check endpoint',
             'GET /weather': 'Current weather data (query params: city OR lat,lon)',
             'GET /forecast': '5-day forecast data (query params: city OR lat,lon)',
-            'POST /log': 'Analytics logging endpoint'
         }
     });
 });

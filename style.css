@@ -13,10 +13,6 @@
     --text-primary: #1F2937;
     --text-secondary: #4B5563;
     --text-light: #6B7280;
-    --bg-primary: #ffffff;
-    --bg-secondary: #f8fafc;
-    --bg-card: #ffffff;
-    --border-color: #e5e7eb;
     
     /* Shadows */
     --shadow-light: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
@@ -26,7 +22,6 @@
     /* Gradients */
     --gradient-primary: linear-gradient(135deg, #059669 0%, #047857 100%);
     --gradient-secondary: linear-gradient(135deg, #10B981 0%, #059669 100%);
-    --gradient-card: linear-gradient(135deg, #059669 0%, #047857 100%);
     
     /* Border Radius */
     --border-radius: 16px;
