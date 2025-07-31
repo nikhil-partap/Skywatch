@@ -103,28 +103,29 @@ class WeatherApp {
         });
     }
 
-    // ===== DOM ELEMENT CACHING =====
+    // ===== DOM CACHING =====
     cacheDOMElements() {
-        // Search elements
-        this.searchBtn = document.getElementById('searchBtn');
-        this.searchInput = document.getElementById('searchInput');
-        this.welcomeSearchBtn = document.getElementById('welcomeSearchBtn');
-        this.welcomeSearchInput = document.getElementById('welcomeSearchInput');
-        
-        // Location elements
-        this.locationBtn = document.getElementById('locationBtn');
-        this.welcomeLocationBtn = document.getElementById('welcomeLocationBtn');
-        
-        // Retry element
-        this.retryBtn = document.getElementById('retryBtn');
-        
-        // State containers
+        // Main containers
         this.loadingState = document.getElementById('loadingState');
         this.errorState = document.getElementById('errorState');
-        this.errorMessage = document.getElementById('errorMessage');
         this.welcomeState = document.getElementById('welcomeState');
         this.weatherDisplay = document.getElementById('weatherDisplay');
-        
+        this.toastContainer = document.getElementById('toastContainer');
+
+        // Search elements
+        this.searchInput = document.getElementById('searchInput');
+        this.searchBtn = document.getElementById('searchBtn');
+        this.locationBtn = document.getElementById('locationBtn');
+
+        // Welcome elements
+        this.welcomeSearchInput = document.getElementById('welcomeSearchInput');
+        this.welcomeSearchBtn = document.getElementById('welcomeSearchBtn');
+        this.welcomeLocationBtn = document.getElementById('welcomeLocationBtn');
+
+        // Error elements
+        this.errorMessage = document.getElementById('errorMessage');
+        this.retryBtn = document.getElementById('retryBtn');
+
         // Weather display elements
         this.cityName = document.getElementById('cityName');
         this.countryName = document.getElementById('countryName');
@@ -132,59 +133,113 @@ class WeatherApp {
         this.temperature = document.getElementById('temperature');
         this.weatherDescription = document.getElementById('weatherDescription');
         this.weatherIcon = document.getElementById('weatherIcon');
+
+        // Weather details
         this.feelsLike = document.getElementById('feelsLike');
         this.humidity = document.getElementById('humidity');
         this.windSpeed = document.getElementById('windSpeed');
         this.visibility = document.getElementById('visibility');
-        
-        // Forecast elements
+
+        // Forecast containers
+        this.hourlyContainer = document.getElementById('hourlyContainer');
         this.forecastContainer = document.getElementById('forecastContainer');
-        
-        // Additional info elements
+
+        // Additional info
         this.sunrise = document.getElementById('sunrise');
         this.sunset = document.getElementById('sunset');
         this.pressure = document.getElementById('pressure');
         this.uvIndex = document.getElementById('uvIndex');
     }
 
-    // ===== INITIALIZATION =====
-    initializeApp() {
-        this.showWelcomeState();   // without this we will load a blank welcome page 
-        this.loadLastLocation();  // this function is responsible for loading the last location from localStorage 
+    // ===== TOAST NOTIFICATIONS =====
+    showToast(message, type = 'info', duration = 4000) {
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.textContent = message;
+        
+        this.toastContainer.appendChild(toast);
+        
+        // Trigger animation
+        setTimeout(() => {
+            toast.classList.add('show');
+        }, 100);
+        
+        // Auto remove
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.parentNode.removeChild(toast);
+                }
+            }, 300);
+        }, duration);
     }
 
-    // ===== EVENT HANDLING =====
+    // ===== INITIALIZATION =====
+    initializeApp() {
+        this.loadLastLocation();
+        this.showWelcomeState();
+    }
+
     bindEvents() {
-        // Search functionality 
-        // 1 : grab the input field + search button for both Main, Welcome screen.
-        // 2 : When the search button is clicked, grab the current value from the input field and call handleSearch() with that. The ?. ensures the app doesn't crash if the element is null.
-        this.searchBtn?.addEventListener('click', () => this.handleSearch(this.searchInput.value));
-        this.welcomeSearchBtn?.addEventListener('click', () => this.handleSearch(this.welcomeSearchInput.value));
-
-        // Enter key support  : if the user press the enter key it will trigger the handleSearch() same behavior as clicking the search button.
-        this.searchInput?.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') this.handleSearch(this.searchInput.value);
-        });
-        this.welcomeSearchInput?.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') this.handleSearch(this.welcomeSearchInput.value);
+        // Search functionality
+        this.searchBtn.addEventListener('click', () => {
+            const cityName = this.searchInput.value.trim();
+            if (cityName) {
+                this.handleSearch(cityName);
+            }
         });
 
-        // Location button  : These buttons use the browser's geolocation API to get current location weather.
-        this.locationBtn?.addEventListener('click', () => this.getCurrentLocation());
-        this.welcomeLocationBtn?.addEventListener('click', () => this.getCurrentLocation());
+        this.searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const cityName = this.searchInput.value.trim();
+                if (cityName) {
+                    this.handleSearch(cityName);
+                }
+            }
+        });
 
-        // Retry button  : This gives the user a way to retry the last failed search, using stored city data.
-        this.retryBtn?.addEventListener('click', () => this.retryLastSearch());
+        // Location functionality
+        this.locationBtn.addEventListener('click', () => {
+            this.getCurrentLocation();
+        });
+
+        // Welcome page events
+        this.welcomeLocationBtn.addEventListener('click', () => {
+            this.getCurrentLocation();
+        });
+
+        this.welcomeSearchBtn.addEventListener('click', () => {
+            const cityName = this.welcomeSearchInput.value.trim();
+            if (cityName) {
+                this.handleSearch(cityName);
+            }
+        });
+
+        this.welcomeSearchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const cityName = this.welcomeSearchInput.value.trim();
+                if (cityName) {
+                    this.handleSearch(cityName);
+                }
+            }
+        });
+
+        // Retry functionality
+        this.retryBtn.addEventListener('click', () => {
+            this.retryLastSearch();
+        });
     }
 
     // ===== SEARCH & LOCATION HANDLING =====
     async handleSearch(cityName) {
-        if (!cityName.trim()) {    // trim removes the whitespace like "  " from the start and end of the string(cityName)
-            this.showError('Please enter a city name');
+        if (!cityName.trim()) {
+            this.showToast('Please enter a city name', 'warning');
             return;
         }
 
-        this.showLoadingState();
+        // Show loading with specific message
+        this.showLoadingState('Searching for weather data...');
         
         // Set a timeout for the entire search process
         const searchTimeout = setTimeout(() => {
@@ -199,6 +254,9 @@ class WeatherApp {
             
             this.lastSearchedCity = cityName;
             this.saveLastLocation(cityName);
+            
+            // Show success toast
+            this.showToast(`Weather data loaded for ${cityName}`, 'success');
             
             // Log the search event
             this.logEvent({
@@ -220,7 +278,26 @@ class WeatherApp {
         } catch (error) {
             clearTimeout(searchTimeout); // Clear timeout on error
             console.error('Search error:', error);
-            this.showError(error.message);
+            
+            // Provide more specific error messages
+            let errorMessage = error.message;
+            
+            // Check for common city name issues
+            if (error.message.includes('City not found')) {
+                errorMessage = `City "${cityName.trim()}" not found. Please check the spelling and try again.`;
+                this.showToast(`City "${cityName.trim()}" not found`, 'error');
+            } else if (error.message.includes('Network error')) {
+                errorMessage = 'Unable to connect to weather service. Please check your internet connection and try again.';
+                this.showToast('Network error. Please check your connection.', 'error');
+            } else if (error.message.includes('Request timed out')) {
+                errorMessage = 'Request timed out. Please try again or check your internet connection.';
+                this.showToast('Request timed out. Please try again.', 'error');
+            } else if (error.message.includes('Too many requests')) {
+                errorMessage = 'Too many requests. Please wait a moment and try again.';
+                this.showToast('Too many requests. Please wait a moment.', 'warning');
+            }
+            
+            this.showError(errorMessage);
         }
     }
 
@@ -228,16 +305,18 @@ class WeatherApp {
         // Prevent multiple rapid calls
         if (this.isGettingLocation) {
             console.log('Location request already in progress');
+            this.showToast('Location request already in progress', 'info');
             return;
         }
 
         if (!navigator.geolocation) {
-            this.showError('Geolocation is not supported by your browser');
+            this.showToast('Geolocation not supported by your browser', 'error');
+            this.showError('Geolocation is not supported by your browser. Please search for a city instead.');
             return;
         }
 
         this.isGettingLocation = true;
-        this.showLoadingState();
+        this.showLoadingState('Getting your location...');
         
         // Set a global timeout for the entire location process
         const locationTimeout = setTimeout(() => {
@@ -251,11 +330,16 @@ class WeatherApp {
             const position = await this.getCurrentPosition();
             clearTimeout(locationTimeout); // Clear timeout on success
             
+            this.showLoadingState('Fetching weather for your location...');
+            
             const { latitude, longitude } = position.coords;
             await this.fetchWeatherDataByCoords(latitude, longitude);
             
             // Get city name from the fetched weather data for logging
             const cityName = this.currentWeather ? this.currentWeather.name : 'Unknown Location';
+            
+            // Show success toast
+            this.showToast(`Weather data loaded for your location`, 'success');
             
             // Log the location search event
             this.logEvent({
@@ -278,43 +362,35 @@ class WeatherApp {
             this.smoothScrollToWeather();
         } catch (error) {
             clearTimeout(locationTimeout); // Clear timeout on error
-            
-            console.warn('Location access failed:', error.message);
-            
-            // Handle different types of location errors
-            if (error.message.includes('permission') || error.message.includes('denied')) {
-                console.log('Location permission denied by user');
-                this.showError('Location access denied. Please enable location permissions in your browser settings.');
-            } else if (error.message.includes('unavailable')) {
-                console.log('Location information temporarily unavailable');
-                this.showError('Location service temporarily unavailable. Please try again in a few moments.');
-            } else if (error.message.includes('timeout')) {
-                console.log('Location request timed out');
-                this.showError('Location request timed out. Please check your internet connection and try again.');
-            } else {
-                console.log('Unknown location error:', error.message);
-                this.showError('Unable to get your location. Please try searching for a city instead.');
-            }
-        } finally {
             this.isGettingLocation = false;
+            console.error('Location error:', error);
+            
+            // Provide more specific location error messages
+            let errorMessage = error.message;
+            
+            if (error.code === 1) {
+                errorMessage = 'Location access denied. Please allow location access or search for a city instead.';
+                this.showToast('Location access denied', 'error');
+            } else if (error.code === 2) {
+                errorMessage = 'Location unavailable. Please try again or search for a city instead.';
+                this.showToast('Location unavailable', 'error');
+            } else if (error.code === 3) {
+                errorMessage = 'Location request timed out. Please try again or search for a city instead.';
+                this.showToast('Location request timed out', 'error');
+            } else if (error.message.includes('Network error')) {
+                errorMessage = 'Unable to connect to weather service. Please check your internet connection and try again.';
+                this.showToast('Network error. Please check your connection.', 'error');
+            }
+            
+            this.showError(errorMessage);
         }
     }
 
     getCurrentPosition() {
         return new Promise((resolve, reject) => {
-            const timeoutId = setTimeout(() => {
-                reject(new Error('Location request timed out'));
-            }, 10000);
-
             navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    clearTimeout(timeoutId);
-                    resolve(position);
-                },
-                (error) => {
-                    clearTimeout(timeoutId);
-                    reject(new Error(this.getGeolocationErrorMessage(error)));
-                },
+                resolve,
+                reject,
                 {
                     enableHighAccuracy: true,
                     timeout: 10000,
@@ -326,75 +402,61 @@ class WeatherApp {
 
     getGeolocationErrorMessage(error) {
         switch (error.code) {
-            case error.PERMISSION_DENIED:
-                return 'Location access denied. Please enable location permissions.';
-            case error.POSITION_UNAVAILABLE:
-                return 'Location information is unavailable.';
-            case error.TIMEOUT:
-                return 'Location request timed out.';
+            case 1:
+                return 'Location access denied. Please allow location access in your browser settings.';
+            case 2:
+                return 'Location unavailable. Please try again or search for a city instead.';
+            case 3:
+                return 'Location request timed out. Please try again or search for a city instead.';
             default:
-                return 'An unknown error occurred while getting location.';
+                return 'Unable to get your location. Please search for a city instead.';
         }
     }
 
-    // ===== WEATHER DATA FETCHING =====
+    // ===== API REQUEST HANDLING =====
     async fetchWeatherData(cityName) {
-        try {
-            const [currentWeather, forecast] = await Promise.all([
-                this.fetchCurrentWeather(cityName),
-                this.fetchForecast(cityName)
-            ]);
-
-            this.currentWeather = currentWeather;
-            this.forecast = forecast;
-            this.displayWeatherData();
-        } catch (error) {
-            throw new Error(`Unable to fetch weather data for ${cityName}. Please check the city name and try again.`);
-        }
+        const currentWeather = await this.fetchCurrentWeather(cityName);
+        const forecast = await this.fetchForecast(cityName);
+        
+        this.currentWeather = currentWeather;
+        this.forecast = forecast;
+        
+        this.displayWeatherData();
     }
 
     async fetchWeatherDataByCoords(lat, lon) {
-        try {
-            const [currentWeather, forecast] = await Promise.all([
-                this.fetchCurrentWeatherByCoords(lat, lon),
-                this.fetchForecastByCoords(lat, lon)
-            ]);
-
-            this.currentWeather = currentWeather;
-            this.forecast = forecast;
-            this.displayWeatherData();
-        } catch (error) {
-            throw new Error('Unable to fetch weather data for your location. Please try again.');
-        }
+        const currentWeather = await this.fetchCurrentWeatherByCoords(lat, lon);
+        const forecast = await this.fetchForecastByCoords(lat, lon);
+        
+        this.currentWeather = currentWeather;
+        this.forecast = forecast;
+        
+        this.displayWeatherData();
     }
 
     async fetchCurrentWeather(cityName) {
         const url = `${this.backendUrl}/weather?city=${encodeURIComponent(cityName)}`;
-        const response = await this.makeApiRequest(url);
-        return response;
+        return await this.makeApiRequest(url);
     }
 
     async fetchCurrentWeatherByCoords(lat, lon) {
         const url = `${this.backendUrl}/weather?lat=${lat}&lon=${lon}`;
-        const response = await this.makeApiRequest(url);
-        return response;
+        return await this.makeApiRequest(url);
     }
 
     async fetchForecast(cityName) {
         const url = `${this.backendUrl}/forecast?city=${encodeURIComponent(cityName)}`;
-        const response = await this.makeApiRequest(url);
-        return response;
+        return await this.makeApiRequest(url);
     }
 
     async fetchForecastByCoords(lat, lon) {
         const url = `${this.backendUrl}/forecast?lat=${lat}&lon=${lon}`;
-        const response = await this.makeApiRequest(url);
-        return response;
+        return await this.makeApiRequest(url);
     }
 
     async makeApiRequest(url) {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 15000); // Increased to 15 seconds
+        const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 seconds timeout
 
         try {
             const response = await fetch(url, {
@@ -403,45 +465,43 @@ class WeatherApp {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json'
                 },
-                signal: controller.signal    // fetch() does not support a built-in timeout. It will wait forever unless you cancel it. That's why this external controller is needed.
+                signal: controller.signal
             });
 
             clearTimeout(timeoutId);
             
-            // error handling block
+            // Enhanced error handling with specific messages
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
                 
                 if (response.status === 400) {
-                    throw new Error(errorData.details || 'Invalid request parameters');
+                    throw new Error(errorData.details || 'Invalid request. Please check your input and try again.');
                 } else if (response.status === 404) {
                     throw new Error(errorData.details || 'City not found. Please check the spelling and try again.');
                 } else if (response.status === 429) {
-                    throw new Error(errorData.details || 'Too many requests. Please try again later.');
+                    throw new Error(errorData.details || 'Too many requests. Please wait a moment and try again.');
                 } else if (response.status === 500) {
                     throw new Error(errorData.details || 'Server error. Please try again later.');
                 } else if (response.status === 502 || response.status === 503) {
                     throw new Error(errorData.details || 'Weather service temporarily unavailable. Please try again later.');
                 } else if (response.status === 504) {
-                    throw new Error(errorData.details || 'Request timeout. Please try again.');  // works only if the server sends a 504 status code in its response.
+                    throw new Error(errorData.details || 'Request timeout. Please try again.');
                 } else {
-                    throw new Error(errorData.details || `Request failed with status ${response.status}`);
+                    throw new Error(errorData.details || `Request failed with status ${response.status}. Please try again.`);
                 }
             }
-            // Success case : if the response is ok then the data is returned.
+            
             const data = await response.json();
             return data;
-        }
-        // Catch block – non-HTTP errors
-        catch (error) {
-            
+        } catch (error) {
             if (error.name === 'AbortError') {
-                throw new Error('Request timed out. Please check your internet connection and try again.');   // adding new error message for the abort error ()
+                throw new Error('Request timed out. Please check your internet connection and try again.');
             }
 
             if (error.name === 'TypeError' && error.message.includes('fetch')) {
                 throw new Error('Network error. Please check your internet connection and ensure the backend server is running.');
             }
+            
             throw error;
         }
     }
@@ -451,18 +511,19 @@ class WeatherApp {
         this.hideAllStates();
         this.showWeatherDisplay();
         
-        // Make the weather display visible immediately
+        // Add animation class for smooth transition
         this.weatherDisplay.classList.add('animate');
         
         this.updateCurrentWeather();
-        this.updateForecast();
+        this.updateHourlyForecast();
+        this.updateDailyForecast();
         this.updateAdditionalInfo();
     }
 
     updateCurrentWeather() {
         const weather = this.currentWeather;
         
-        // Update location
+        // Update location with better formatting
         this.cityName.textContent = weather.name;
         this.countryName.textContent = weather.sys.country;
         this.dateTime.textContent = this.formatDateTime(weather.dt, weather.timezone);
@@ -472,19 +533,52 @@ class WeatherApp {
         this.weatherDescription.textContent = weather.weather[0].description;
         this.weatherIcon.className = `weather-icon ${this.getWeatherIcon(weather.weather[0].id)}`;
 
-        // Update weather details
+        // Update weather details with better formatting
         this.animateValue(this.feelsLike, `${Math.round(weather.main.feels_like)}°C`);
         this.animateValue(this.humidity, `${weather.main.humidity}%`);
         this.animateValue(this.windSpeed, this.convertWindSpeed(weather.wind.speed));
         this.animateValue(this.visibility, `${(weather.visibility / 1000).toFixed(1)} km`);
     }
 
-    updateForecast() {
+    updateHourlyForecast() {
+        this.hourlyContainer.innerHTML = '';
+
+        if (!this.forecast || !this.forecast.list) return;
+
+        // Get next 24 hours of forecast
+        const hourlyData = this.forecast.list.slice(0, 8); // 3-hour intervals, so 8 = 24 hours
+        
+        hourlyData.forEach((hour, index) => {
+            const hourlyCard = this.createHourlyCard(hour);
+            this.hourlyContainer.appendChild(hourlyCard);
+        });
+    }
+
+    createHourlyCard(hour) {
+        const card = document.createElement('div');
+        card.className = 'hourly-card';
+        
+        const time = new Date(hour.dt * 1000);
+        const timeString = time.toLocaleTimeString('en-US', { 
+            hour: '2-digit', 
+            minute: '2-digit',
+            hour12: true 
+        });
+        
+        card.innerHTML = `
+            <div class="hourly-time">${timeString}</div>
+            <i class="hourly-icon ${this.getWeatherIcon(hour.weather[0].id)}"></i>
+            <div class="hourly-temp">${Math.round(hour.main.temp)}°C</div>
+            <div class="hourly-desc">${hour.weather[0].description}</div>
+        `;
+        return card;
+    }
+
+    updateDailyForecast() {
         this.forecastContainer.innerHTML = '';
 
         // Group forecast by day and get daily data
-        const dailyForecast = this.getDailyForecast();   
-        // this function takes the raw forecast data (which usually gives data every 3 hours), and groups it into daily summaries.
+        const dailyForecast = this.getDailyForecast();
         
         dailyForecast.forEach((day, index) => {
             const forecastCard = this.createForecastCard(day);
@@ -495,18 +589,18 @@ class WeatherApp {
     createForecastCard(day) {
         const card = document.createElement('div');
         card.className = 'forecast-card';
-        
         card.innerHTML = `
-            <div class="forecast-date">${this.formatDate(day.date)}</div>
+            <div class="forecast-date">${day.date}</div>
             <i class="forecast-icon ${this.getWeatherIcon(day.weatherId)}"></i>
             <div class="forecast-temp">${Math.round(day.temp)}°C</div>
             <div class="forecast-desc">${day.description}</div>
         `;
-        
         return card;
     }
 
     getDailyForecast() {
+        if (!this.forecast || !this.forecast.list) return [];
+
         const dailyData = {};
         
         this.forecast.list.forEach(item => {
@@ -515,7 +609,7 @@ class WeatherApp {
             
             if (!dailyData[dayKey]) {
                 dailyData[dayKey] = {
-                    date: date,
+                    date: this.formatDate(item.dt),
                     temp: item.main.temp,
                     weatherId: item.weather[0].id,
                     description: item.weather[0].description,
@@ -527,113 +621,84 @@ class WeatherApp {
             }
         });
 
-        // Calculate average temperature and return array
-        return Object.values(dailyData)
-            .map(day => ({
-                ...day,
-                temp: day.temp / day.count
-            }))
-            .slice(0, 5); // Return only 5 days
+        // Calculate average temperature and return array (7 days)
+        return Object.values(dailyData).map(day => ({
+            ...day,
+            temp: day.temp / day.count
+        })).slice(0, 7); // Return 7 days
     }
 
     updateAdditionalInfo() {
         const weather = this.currentWeather;
         
-        // Update sunrise and sunset
+        // Update sunrise and sunset times
         this.sunrise.textContent = this.formatTime(weather.sys.sunrise, weather.timezone);
         this.sunset.textContent = this.formatTime(weather.sys.sunset, weather.timezone);
         
         // Update pressure
         this.pressure.textContent = `${weather.main.pressure} hPa`;
         
-        // Note: UV index is not available in the free API tier
-        // You would need to make an additional API call for this
-        this.uvIndex.textContent = 'N/A';
+        // Update UV index (if available)
+        if (weather.uvi !== undefined) {
+            this.uvIndex.textContent = weather.uvi;
+        } else {
+            this.uvIndex.textContent = 'N/A';
+        }
+    }
+
+    // ===== WEATHER ICON MAPPING =====
+    getWeatherIcon(weatherId) {
+        // Thunderstorm
+        if (weatherId >= 200 && weatherId < 300) {
+            return 'fas fa-bolt';
+        }
+        // Drizzle
+        else if (weatherId >= 300 && weatherId < 400) {
+            return 'fas fa-cloud-rain';
+        }
+        // Rain
+        else if (weatherId >= 500 && weatherId < 600) {
+            if (weatherId >= 511 && weatherId <= 531) {
+                return 'fas fa-cloud-showers-heavy';
+            }
+            return 'fas fa-cloud-rain';
+        }
+        // Snow
+        else if (weatherId >= 600 && weatherId < 700) {
+            return 'fas fa-snowflake';
+        }
+        // Atmosphere (fog, mist, etc.)
+        else if (weatherId >= 700 && weatherId < 800) {
+            return 'fas fa-smog';
+        }
+        // Clear
+        else if (weatherId === 800) {
+            return 'fas fa-sun';
+        }
+        // Clouds
+        else if (weatherId >= 801 && weatherId < 900) {
+            if (weatherId === 801) {
+                return 'fas fa-cloud-sun';
+            } else if (weatherId === 802) {
+                return 'fas fa-cloud';
+            } else {
+                return 'fas fa-clouds';
+            }
+        }
+        // Default
+        else {
+            return 'fas fa-cloud';
+        }
     }
 
     // ===== UTILITY FUNCTIONS =====
-    getWeatherIcon(weatherId) {
-        const iconMap = {
-            // Clear
-            800: 'fas fa-sun',
-            
-            // Clouds
-            801: 'fas fa-cloud-sun',
-            802: 'fas fa-cloud',
-            803: 'fas fa-cloud',
-            804: 'fas fa-clouds',
-            
-            // Rain
-            200: 'fas fa-bolt',
-            201: 'fas fa-cloud-rain',
-            202: 'fas fa-cloud-showers-heavy',
-            210: 'fas fa-bolt',
-            211: 'fas fa-bolt',
-            212: 'fas fa-bolt',
-            221: 'fas fa-bolt',
-            230: 'fas fa-cloud-rain',
-            231: 'fas fa-cloud-rain',
-            232: 'fas fa-cloud-showers-heavy',
-            
-            // Drizzle
-            300: 'fas fa-cloud-rain',
-            301: 'fas fa-cloud-rain',
-            302: 'fas fa-cloud-rain',
-            310: 'fas fa-cloud-rain',
-            311: 'fas fa-cloud-rain',
-            312: 'fas fa-cloud-rain',
-            313: 'fas fa-cloud-rain',
-            314: 'fas fa-cloud-rain',
-            321: 'fas fa-cloud-rain',
-            
-            // Rain
-            500: 'fas fa-cloud-rain',
-            501: 'fas fa-cloud-rain',
-            502: 'fas fa-cloud-showers-heavy',
-            503: 'fas fa-cloud-showers-heavy',
-            504: 'fas fa-cloud-showers-heavy',
-            511: 'fas fa-cloud-rain',
-            520: 'fas fa-cloud-rain',
-            521: 'fas fa-cloud-rain',
-            522: 'fas fa-cloud-showers-heavy',
-            531: 'fas fa-cloud-showers-heavy',
-            
-            // Snow
-            600: 'fas fa-snowflake',
-            601: 'fas fa-snowflake',
-            602: 'fas fa-snowflake',
-            611: 'fas fa-snowflake',
-            612: 'fas fa-snowflake',
-            613: 'fas fa-snowflake',
-            615: 'fas fa-snowflake',
-            616: 'fas fa-snowflake',
-            620: 'fas fa-snowflake',
-            621: 'fas fa-snowflake',
-            622: 'fas fa-snowflake',
-            
-            // Atmosphere
-            701: 'fas fa-smog',
-            711: 'fas fa-smog',
-            721: 'fas fa-smog',
-            731: 'fas fa-smog',
-            741: 'fas fa-smog',
-            751: 'fas fa-smog',
-            761: 'fas fa-smog',
-            762: 'fas fa-smog',
-            771: 'fas fa-wind',
-            781: 'fas fa-tornado'
-        };
-        
-        return iconMap[weatherId] || 'fas fa-cloud';
-    }
-
     convertWindSpeed(speedMs) {
-        const speedKmh = (speedMs * 3.6).toFixed(1);
+        const speedKmh = Math.round(speedMs * 3.6);
         return `${speedKmh} km/h`;
     }
 
     formatDate(timestamp) {
-        const date = new Date(timestamp);
+        const date = new Date(timestamp * 1000);
         return date.toLocaleDateString('en-US', { 
             weekday: 'short',
             month: 'short',
@@ -642,36 +707,37 @@ class WeatherApp {
     }
 
     formatTime(timestamp, timezone) {
-        // OpenWeatherMap provides sunrise/sunset in UTC
-        // We need to convert to local time using the timezone offset
         const date = new Date(timestamp * 1000);
-        const utcTime = date.getTime() + (timezone * 1000);
-        const localDate = new Date(utcTime);
-        
-        return localDate.toLocaleTimeString('en-US', {
-            hour: '2-digit',
+        return date.toLocaleTimeString('en-US', { 
+            hour: '2-digit', 
             minute: '2-digit',
-            hour12: false
+            hour12: true 
         });
     }
 
     formatDateTime(timestamp, timezone) {
-        const date = new Date((timestamp + timezone) * 1000);
-        return date.toLocaleString('en-US', {
+        const date = new Date(timestamp * 1000);
+        return date.toLocaleString('en-US', { 
             weekday: 'long',
             year: 'numeric',
             month: 'long',
             day: 'numeric',
             hour: '2-digit',
             minute: '2-digit',
-            hour12: false
+            hour12: true
         });
     }
 
     // ===== UI STATE MANAGEMENT =====
-    showLoadingState() {
+    showLoadingState(message = 'Loading...') {
         this.hideAllStates();
         this.loadingState.classList.remove('hidden');
+        
+        // Update loading message if element exists
+        const loadingText = this.loadingState.querySelector('p');
+        if (loadingText) {
+            loadingText.textContent = message;
+        }
     }
 
     showError(message) {
@@ -767,113 +833,4 @@ class WeatherApp {
 document.addEventListener('DOMContentLoaded', () => {
     // Initialize the app
     const app = new WeatherApp();
-    
-    // Add some additional features
-    app.debouncedSearch = app.debounce(app.handleSearch.bind(app), 4000);
-    
-    // Add input event listeners for real-time search suggestions (optional)
-    const searchInput = document.getElementById('searchInput');
-    const welcomeSearchInput = document.getElementById('welcomeSearchInput');
-    
-    searchInput?.addEventListener('input', (e) => {
-        if (e.target.value.length > 6) {
-            app.debouncedSearch(e.target.value);
-        }
-    });
-    
-    welcomeSearchInput?.addEventListener('input', (e) => {
-        if (e.target.value.length > 40) {
-            app.debouncedSearch(e.target.value);
-        }
-    });
-});
-
-// Add service worker for PWA capabilities (optional)
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        console.log('Attempting to register service worker...');
-        console.log('Current location:', window.location.href);
-        console.log('Hostname:', window.location.hostname);
-        
-        // Check if we're on GitHub Pages and adjust the path
-        const isGitHubPages = window.location.hostname === 'nikhil-partap.github.io';
-        const swPath = isGitHubPages ? '/Skywatch/sw.js' : '/sw.js';
-        
-        console.log('Service worker path:', swPath);
-        
-        // First, check if the service worker file exists
-        fetch(swPath, { method: 'HEAD' })
-            .then(response => {
-                if (response.ok) {
-                    console.log('Service worker file found at:', swPath);
-                    return navigator.serviceWorker.register(swPath);
-                } else {
-                    throw new Error(`Service worker file not found at ${swPath}`);
-                }
-            })
-            .then(registration => {
-                console.log('SW registered successfully: ', registration);
-                
-                // Check for updates
-                registration.addEventListener('updatefound', () => {
-                    const newWorker = registration.installing;
-                    newWorker.addEventListener('statechange', () => {
-                        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                            // New service worker available
-                            console.log('New service worker available');
-                        }
-                    });
-                });
-            })
-            .catch(registrationError => {
-                console.log('SW registration failed: ', registrationError);
-                
-                // Try alternative path for GitHub Pages
-                if (isGitHubPages) {
-                    console.log('Trying fallback path: /sw.js');
-                    navigator.serviceWorker.register('/sw.js')
-                        .then(registration => {
-                            console.log('SW registered with fallback path: ', registration);
-                        })
-                        .catch(fallbackError => {
-                            console.log('SW fallback registration also failed: ', fallbackError);
-                            console.log('Service worker registration completely failed. This is normal for development.');
-                        });
-                }
-            });
-    });
-}
-
-// Add keyboard shortcuts
-document.addEventListener('keydown', (e) => {
-    // Ctrl/Cmd + K to focus search
-    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-        e.preventDefault();
-        const searchInput = document.getElementById('searchInput');
-        if (searchInput) {
-            searchInput.focus();
-        }
-    }
-    
-    // Escape to clear search
-    if (e.key === 'Escape') {
-        const searchInput = document.getElementById('searchInput');
-        const welcomeSearchInput = document.getElementById('welcomeSearchInput');
-        
-        if (searchInput) searchInput.value = '';
-        if (welcomeSearchInput) welcomeSearchInput.value = '';
-        
-        document.activeElement.blur();
-    }
-});
-
-// Add offline detection
-window.addEventListener('online', () => {
-    console.log('App is online');
-    // You could show a notification here
-});
-
-window.addEventListener('offline', () => {
-    console.log('App is offline');
-    // You could show a notification here
 });

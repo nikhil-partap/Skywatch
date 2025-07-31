@@ -58,6 +58,9 @@
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌤️</text></svg>">
 </head>
 <body>
+    <!-- Toast Notifications Container -->
+    <div id="toastContainer" class="toast-container"></div>
+
     <div class="container">
         <!-- Header -->
         <header class="header" role="banner">
@@ -89,10 +92,29 @@
 
         <!-- Main Content -->
         <main class="main-content" role="main">
-            <!-- Loading State -->
+            <!-- Loading State with Skeleton UI -->
             <div id="loadingState" class="loading-state hidden" role="status" aria-live="polite">
                 <div class="spinner" aria-hidden="true"></div>
                 <p>Fetching weather data...</p>
+                
+                <!-- Skeleton UI -->
+                <div class="skeleton-container">
+                    <div class="skeleton-card current-skeleton">
+                        <div class="skeleton-header">
+                            <div class="skeleton-title"></div>
+                            <div class="skeleton-subtitle"></div>
+                        </div>
+                        <div class="skeleton-temperature"></div>
+                        <div class="skeleton-description"></div>
+                    </div>
+                    
+                    <div class="skeleton-grid">
+                        <div class="skeleton-item"></div>
+                        <div class="skeleton-item"></div>
+                        <div class="skeleton-item"></div>
+                        <div class="skeleton-item"></div>
+                    </div>
+                </div>
             </div>
 
             <!-- Error State -->
@@ -105,9 +127,9 @@
 
             <!-- Weather Display -->
             <div id="weatherDisplay" class="weather-display hidden" role="region" aria-label="Weather Information">
-                <!-- Current Weather -->
-                <section class="current-weather" aria-labelledby="current-weather-title">
-                    <div class="weather-info">
+                <!-- Current Weather Card -->
+                <section class="current-weather-card" aria-labelledby="current-weather-title">
+                    <div class="weather-header">
                         <div class="location">
                             <h2 id="cityName" id="current-weather-title">City Name</h2>
                             <p id="countryName">Country</p>
@@ -123,31 +145,43 @@
                             </div>
                         </div>
                     </div>
-                    <div class="weather-details" role="list" aria-label="Weather Details">
-                        <div class="detail-item" role="listitem">
-                            <i class="fas fa-thermometer-half" aria-hidden="true"></i>
-                            <div>
+                </section>
+
+                <!-- Weather Details Cards -->
+                <section class="weather-details-section">
+                    <div class="weather-details-grid">
+                        <div class="detail-card" role="listitem">
+                            <div class="detail-icon">
+                                <i class="fas fa-thermometer-half" aria-hidden="true"></i>
+                            </div>
+                            <div class="detail-content">
                                 <span class="label">Feels Like</span>
                                 <span id="feelsLike" class="value">25°C</span>
                             </div>
                         </div>
-                        <div class="detail-item" role="listitem">
-                            <i class="fas fa-tint" aria-hidden="true"></i>
-                            <div>
+                        <div class="detail-card" role="listitem">
+                            <div class="detail-icon">
+                                <i class="fas fa-tint" aria-hidden="true"></i>
+                            </div>
+                            <div class="detail-content">
                                 <span class="label">Humidity</span>
                                 <span id="humidity" class="value">65%</span>
                             </div>
                         </div>
-                        <div class="detail-item" role="listitem">
-                            <i class="fas fa-wind" aria-hidden="true"></i>
-                            <div>
+                        <div class="detail-card" role="listitem">
+                            <div class="detail-icon">
+                                <i class="fas fa-wind" aria-hidden="true"></i>
+                            </div>
+                            <div class="detail-content">
                                 <span class="label">Wind Speed</span>
                                 <span id="windSpeed" class="value">5.2 km/h</span>
                             </div>
                         </div>
-                        <div class="detail-item" role="listitem">
-                            <i class="fas fa-eye" aria-hidden="true"></i>
-                            <div>
+                        <div class="detail-card" role="listitem">
+                            <div class="detail-icon">
+                                <i class="fas fa-eye" aria-hidden="true"></i>
+                            </div>
+                            <div class="detail-content">
                                 <span class="label">Visibility</span>
                                 <span id="visibility" class="value">10 km</span>
                             </div>
@@ -155,15 +189,23 @@
                     </div>
                 </section>
 
-                <!-- Forecast -->
-                <section class="forecast" aria-labelledby="forecast-title">
-                    <h3 id="forecast-title">5-Day Forecast</h3>
-                    <div id="forecastContainer" class="forecast-container" role="list" aria-label="5-day weather forecast">
+                <!-- Hourly Forecast -->
+                <section class="hourly-forecast" aria-labelledby="hourly-forecast-title">
+                    <h3 id="hourly-forecast-title">Hourly Forecast</h3>
+                    <div id="hourlyContainer" class="hourly-container" role="list" aria-label="Hourly weather forecast">
+                        <!-- Hourly cards will be dynamically generated -->
+                    </div>
+                </section>
+
+                <!-- Daily Forecast -->
+                <section class="daily-forecast" aria-labelledby="daily-forecast-title">
+                    <h3 id="daily-forecast-title">7-Day Forecast</h3>
+                    <div id="forecastContainer" class="forecast-container" role="list" aria-label="7-day weather forecast">
                         <!-- Forecast cards will be dynamically generated -->
                     </div>
                 </section>
 
-                <!-- Additional Info -->
+                <!-- Additional Info Cards -->
                 <section class="additional-info" aria-labelledby="additional-info-title">
                     <div class="info-grid">
                         <div class="info-card" role="article">
@@ -200,11 +242,13 @@
             <!-- Welcome State -->
             <div id="welcomeState" class="welcome-state" role="region" aria-label="Welcome">
                 <div class="welcome-content">
-                    <i class="fas fa-cloud-sun welcome-icon" aria-hidden="true"></i>
+                    <div class="welcome-icon">
+                        <i class="fas fa-cloud-sun" aria-hidden="true"></i>
+                    </div>
                     <h2>Welcome to SkyWatch</h2>
-                    <p>Get real-time weather information for any location around the world with detailed forecasts and current conditions</p>
+                    <p>Get real-time weather information for any location with detailed forecasts and current conditions.</p>
                     <div class="welcome-actions">
-                        <button id="welcomeLocationBtn" class="primary-btn" aria-label="Use my current location">
+                        <button id="welcomeLocationBtn" class="primary-btn">
                             <i class="fas fa-location-arrow" aria-hidden="true"></i>
                             Use My Location
                         </button>
@@ -217,12 +261,10 @@
                                     placeholder="Search for a city..." 
                                     autocomplete="off"
                                     aria-label="Search for a city">
-                                    <button id="welcomeSearchBtn" class="search-btn" aria-label="Search">
-                                        <i class="fas fa-search" aria-hidden="true"></i>
-                                        Search
-                                    </button>
+                                <button id="welcomeSearchBtn" class="search-btn" aria-label="Search">
+                                    <i class="fas fa-search" aria-hidden="true"></i>
+                                </button>
                             </div>
-                            
                         </div>
                     </div>
                 </div>
@@ -231,14 +273,10 @@
 
         <!-- Footer -->
         <footer class="footer" role="contentinfo">
-            <p>
-                &copy; 2025 SkyWatch. Made by 
-                <a href="https://github.com/nikhil-partap" target="_blank" rel="noopener noreferrer">Nikhil Pratap Singh</a> 
-                | Powered by OpenWeatherMap API
-            </p>
+            <p>&copy; 2025 SkyWatch. Built with ❤️ by <a href="https://github.com/nikhil-partap" target="_blank">Nikhil Pratap Singh</a> using modern web technologies.</p>
         </footer>
     </div>
 
-    <script src="script.js?v=2.0.0"></script>
+    <script src="script.js"></script>
 </body>
 </html>
