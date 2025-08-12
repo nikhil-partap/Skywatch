@@ -1,4 +1,4 @@
-# SkyWatch Weather App
+# SkyWatch Weather App live link - https://nikhil-partap.github.io/Skywatch/
 
 A modern, responsive weather application with a secure backend API and beautiful frontend interface.
 
@@ -167,7 +167,6 @@ This project is open source and available under the MIT License.
 ## 🔗 Links
 
 - [Frontend Documentation](README.md)
-- [Backend Setup Guide](skywatch-backend/BACKEND_SETUP.md)
 - [OpenWeatherMap API](https://openweathermap.org/api)
 
 ---
