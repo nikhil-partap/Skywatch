@@ -1,9 +1,8 @@
 // SkyWatch Weather App
 class WeatherApp {
   constructor() {
-    // OpenWeatherMap API configuration
-    this.apiKey = "6f17e5a7248147ee5ea6c35160f18a7a";
-    this.apiBaseUrl = "https://api.openweathermap.org/data/2.5";
+    // Backend API configuration
+    this.backendUrl = "https://skywatch-336o.onrender.com";
     this.currentWeather = null;
     this.forecast = null;
     this.lastSearchedCity = null;
@@ -388,30 +387,31 @@ class WeatherApp {
   }
 
   async fetchCurrentWeather(cityName) {
-    const url = `${this.apiBaseUrl}/weather?q=${encodeURIComponent(
+    const url = `${this.backendUrl}/weather?city=${encodeURIComponent(
       cityName
-    )}&appid=${this.apiKey}&units=metric`;
+    )}`;
     return await this.makeApiRequest(url);
   }
 
   async fetchCurrentWeatherByCoords(lat, lon) {
-    const url = `${this.apiBaseUrl}/weather?lat=${lat}&lon=${lon}&appid=${this.apiKey}&units=metric`;
+    const url = `${this.backendUrl}/weather?lat=${lat}&lon=${lon}`;
     return await this.makeApiRequest(url);
   }
 
   async fetchForecast(cityName) {
-    const url = `${this.apiBaseUrl}/forecast?q=${encodeURIComponent(
+    const url = `${this.backendUrl}/forecast?city=${encodeURIComponent(
       cityName
-    )}&appid=${this.apiKey}&units=metric`;
+    )}`;
     return await this.makeApiRequest(url);
   }
 
   async fetchForecastByCoords(lat, lon) {
-    const url = `${this.apiBaseUrl}/forecast?lat=${lat}&lon=${lon}&appid=${this.apiKey}&units=metric`;
+    const url = `${this.backendUrl}/forecast?lat=${lat}&lon=${lon}`;
     return await this.makeApiRequest(url);
   }
 
   async makeApiRequest(url) {
+    console.log("Making API request to:", url);
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 seconds timeout
 
@@ -426,6 +426,7 @@ class WeatherApp {
       });
 
       clearTimeout(timeoutId);
+      console.log("API response status:", response.status);
 
       // Enhanced error handling with specific messages
       if (!response.ok) {
